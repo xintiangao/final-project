@@ -26,8 +26,8 @@ function goToSignInPage() {
         <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
         <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
           <li><a href='/'>Homepage</a></li>
-          <li><a href='/'>Portfolio</a></li>
-          <li><a href='/'>About</a></li>
+          <li><a href='/'>Budget Calculator</a></li>
+          <li><a href='/history'>Transaction History</a></li>
         </ul>
       </div>
       <button class="w-6 ml-2 flex content-start" on:click={toggleTheme}>

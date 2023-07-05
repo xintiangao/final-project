@@ -1,64 +1,8 @@
 <script>
     import Chart from 'chart.js/auto'
     import { onMount } from 'svelte';
+    import { addRow, addGoalRow, uploadExpenses } from './utils.js'
     
-    
-    let rowCounter = 2;
-    function addRow() {
-        rowCounter++;
-        const newRow = `
-            <tr>
-                <th>${rowCounter}</th>
-                <td>
-                    <div class="dropdown dropdown-bottom flex flex-start">
-                        <label>
-                            <select class="select select-bordered w-32">
-                                <option disabled selected>category</option>
-                                <option>Food</option>
-                                <option>Gas</option>
-                                <option>rent</option>
-                                <option>transport</option>
-                                <option>entertainment</option>
-                                <option>clothes</option>
-                                <option>subscription</option>
-                                <option>others</option>
-                            </select>
-                        </label>
-                    </div>
-                </td>
-                <td><input type="text" placeholder="99.99" class="w-24 input input-bordered input-primary max-w-xs" /></td>
-            </tr>`;
-        document.getElementById('expenseRows').insertAdjacentHTML('beforeend', newRow);
-    }
-
-    let goalCounter = 2;
-    function addGoalRow() {
-        goalCounter++;
-        const newRow = `
-            <tr>
-                <th>${rowCounter}</th>
-                <td>
-                    <div class="dropdown dropdown-bottom flex flex-start">
-                        <label>
-                            <select class="select select-bordered w-32">
-                                <option disabled selected>category</option>
-                                <option>Food</option>
-                                <option>Gas</option>
-                                <option>rent</option>
-                                <option>transport</option>
-                                <option>entertainment</option>
-                                <option>clothes</option>
-                                <option>subscription</option>
-                                <option>others</option>
-                            </select>
-                        </label>
-                    </div>
-                </td>
-                <td><input type="text" placeholder="10/99" class="w-24 input input-bordered input-primary max-w-xs" /></td>
-            </tr>`;
-        document.getElementById('goalRows').insertAdjacentHTML('beforeend', newRow);
-    }
-
 let pieChart;
 onMount(
     async ()=>{
@@ -120,7 +64,6 @@ onMount(async () => {
 
 
 let barChart;
-
 onMount(async () => {
   const currentDay = new Date().getDay(); // Get the index of the current month (0-11)
   const dayNames = [
@@ -152,136 +95,107 @@ onMount(async () => {
     },
   });
 });
-    
-           
-
-
 </script>
 
 <container class="flex justify-around content-center">
     <div class="rounded-box place-items-center w-[50%] h-[80%] flex flex-wrap justify-around content-stretch">
-        <div class="rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
+        <div class="rounded-box w-[100%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
+          <form on:submit|preventDefault={uploadExpenses}>
             <table class="table table-pin-rows font-mono">
-                <!-- head -->
-                <thead>
-                  <tr>
-                    <th>                 
-                      <div>
-                        <button on:click={addRow}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+              <!-- head -->
+              <thead>
+                <tr>
+                  <th>
+                    <div>
+                      <button type="button" onclick="addRow()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                    </div>
+                  </th>
+                  <th class="font-bold text-xl">Category</th>
+                  <th class="font-bold text-xl">Amount</th>
+                  <th class="font-bold text-xl">Date</th>
+                </tr>
+              </thead>
+              <tbody id="expenseRows">
+                <!-- row 1 -->
+                <tr>
+                  <th>1</th>
+                  <td>
+                    <div class="dropdown dropdown-bottom flex flex-start">
+                      <select name="category" class="select select-bordered w-32">
+                        <option disabled selected>category</option>
+                        <option>Food</option>
+                        <option>Gas</option>
+                        <option>rent</option>
+                        <option>transport</option>
+                        <option>entertainment</option>
+                        <option>clothes</option>
+                        <option>subscription</option>
+                        <option>others</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td><input name="amount" type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
+                  <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
+                </tr>
+                <!-- row 2 -->
+                <tr>
+                  <th>2</th>
+                  <td>
+                    <div class="dropdown dropdown-bottom flex flex-start">
+                      <label>
+                        <select name="category" class="select select-bordered w-32">
+                          <option disabled selected class="w-auto">category</option>
+                          <option>Food</option>
+                          <option>Gas</option>
+                          <option>rent</option>
+                          <option>transport</option>
+                          <option>entertainment</option>
+                          <option>clothes</option>
+                          <option>subscription</option>
+                          <option>others</option>
+                        </select>
+                      </label>
+                    </div>
+                  </td>
+                  <td><input name="amount" type="text" placeholder="99.99" class="w-24 input input-bordered input-primary max-w-xs" /></td>
+                  <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
+                </tr>
+                <!-- row 2 -->
+                <tr>
+                    <th>3</th>
+                    <td>
+                      <div class="dropdown dropdown-bottom flex flex-start">
+                        <label>
+                          <select name="category" class="select select-bordered w-32">
+                            <option disabled selected class="w-auto">category</option>
+                            <option>Food</option>
+                            <option>Gas</option>
+                            <option>rent</option>
+                            <option>transport</option>
+                            <option>entertainment</option>
+                            <option>clothes</option>
+                            <option>subscription</option>
+                            <option>others</option>
+                          </select>
+                        </label>
                       </div>
-                    </th>
-                    <th class="font-bold text-xl">Category</th>
-                    <th class="font-bold text-xl" >Amount</th>
-                  </tr>
-                </thead>
-                <tbody id="expenseRows">
-                  <!-- row 1 -->
-                  <tr>
-                    <th>1</th>
-                    <td>
-                        <div class="dropdown dropdown-bottom flex flex-start">
-                            <select class="select select-bordered w-32">
-                                <option disabled selected>category</option>
-                                <option>Food</option>
-                                <option>Gas</option>
-                                <option>rent</option>
-                                <option>transport</option>
-                                <option>entertainment</option>
-                                <option>clothes</option>
-                                <option>subscription</option>
-                                <option>others</option>
-                            </select>
-                        </div>
                     </td>
-                    <td><input type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
+                    <td><input name="amount" type="text" placeholder="99.99" class="w-24 input input-bordered input-primary max-w-xs" /></td>
+                    <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
                   </tr>
-                  <!-- row 2 -->
-                  <tr>
-                    <th>2</th>
-                    <td>
-                        <div class="dropdown dropdown-bottom flex flex-start">
-                            <label>
-                                <select class="select select-bordered w-32">
-                                    <option disabled selected class="w-auto">category</option>
-                                    <option>Food</option>
-                                    <option>Gas</option>
-                                    <option>rent</option>
-                                    <option>transport</option>
-                                    <option>entertainment</option>
-                                    <option>clothes</option>
-                                    <option>subscription</option>
-                                    <option>others</option>
-                                </select>
-                            </label>
-                        </div>
-                    </td>
-                    <td><input type="text" placeholder="99.99" class="w-24 input input-bordered input-primary max-w-xs" /></td>
-                  </tr>
-                </tbody>
-              </table>
+              </tbody>
+            </table>
+            <div class="flex content-center justify-center align-middle items-center m-2 ">
+                <button type="submit" class="btn drop-shadow-lg">Submit</button>
+            </div>
+          </form>
         </div>
         
-        <div class="rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
-            <table class="table table-pin-rows font-mono">
-                <!-- head -->
-                <thead>
-                  <tr>
-                      <th>
-                          <div>
-                              <button on:click={addGoalRow}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-                          </div>
-                      </th>
-                    <th class="font-bold text-xl">Category</th>
-                    <th class="font-bold text-xl">Spent/Goal</th>
-                  </tr>
-                </thead>
-
-                <tbody id="goalRows">
-                  <!-- row 1 -->
-                  <tr>
-                    <th>1</th>
-                    <td>
-                        <div class="dropdown dropdown-bottom flex flex-start">
-                            <select class="select select-bordered w-32">
-                                <option disabled selected>category</option>
-                                <option>Food</option>
-                                <option>Gas</option>
-                                <option>rent</option>
-                                <option>transport</option>
-                                <option>entertainment</option>
-                                <option>clothes</option>
-                                <option>subscription</option>
-                                <option>others</option>
-                            </select>
-                        </div>
-                    </td>
-                    <td><input type="text" placeholder="10/99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
-                  </tr>
-                  <!-- row 2 -->
-                  <tr>
-                    <th>2</th>
-                    <td>
-                        <div class="dropdown dropdown-bottom flex flex-start">
-                            <label>
-                                <select class="select select-bordered w-32">
-                                    <option disabled selected class="w-auto">category</option>
-                                    <option>Food</option>
-                                    <option>Gas</option>
-                                    <option>rent</option>
-                                    <option>transport</option>
-                                    <option>entertainment</option>
-                                    <option>clothes</option>
-                                    <option>subscription</option>
-                                    <option>others</option>
-                                </select>
-                            </label>
-                        </div>
-                    </td>
-                    <td><input type="text" placeholder="10/99" class="w-24 input input-bordered input-primary max-w-xs" /></td>
-                  </tr>
-                </tbody>
-              </table>
-        </div>
         <div class="rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
             <div class="bg-secondary text-primary-content">
   
@@ -289,7 +203,7 @@ onMount(async () => {
                   <div class="stat-title">Total Spend this month</div>
                   <div class="stat-value">$89,400</div>
                   <div class="stat-actions">
-                    <button class="btn btn-sm">View transaction history</button>
+                    <a class="btn btn-sm" href='/history'>View transaction history</a>
                   </div>
                 </div>
                 
