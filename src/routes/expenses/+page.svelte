@@ -25,7 +25,7 @@
 
         const userId = getUserId();
 
-        const jobData = {
+        const ExpenseData = {
         user: userId,
         title: evt.target['title'].value,
         minAnnualCompensation: evt.target['minAnnualCompensation'].value,
