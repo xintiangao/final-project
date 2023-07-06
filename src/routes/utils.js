@@ -68,7 +68,6 @@ let formErrors = {};
         category: '',
         amount: '',
         date:'',
-        note: '',
 		}; 
 
 		if (!evt.target['category'].value) {

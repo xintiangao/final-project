@@ -143,7 +143,7 @@ onMount(async () => {
                   </td>
                   <td><input name="amount" type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
                   <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
-                  <td><input name="amount" type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
+                  <td><input name="note" type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
                 </tr>
               </tbody>
             </table>
