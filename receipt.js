@@ -8,7 +8,7 @@ const client = new DocumentProcessorServiceClient();
 const projectId = 'teak-catalyst-391812';
 const location = 'us'; // Format is 'us' or 'eu'
 const processorId = '83c007cf5288d57c'; // Create processor in Cloud Console
-const filePath = 'receipt.jpeg';
+const filePath = '/home/yongcheeho/next-final-project/files/receipt.jpeg';
 // Instantiates a client
 
 export async function processDocument() {
@@ -46,6 +46,10 @@ export async function processDocument() {
   // Please see the OCR and other samples for how to parse other data in the
   // response.
   const {document} = result;
+  let totalAmount = null
+  let supplierName = null
+  let receiptDate = null
+  let receiptTime = null
   
   for (const entity of document.entities) {
     // Fields detected. For a full list of fields for each processor see
@@ -62,8 +66,34 @@ export async function processDocument() {
         2
       )}% confident)`
     );
+
+    if (key === 'supplier_name') {
+      supplierName = textValue
+    }
+
+    if (key === 'receipt_date') {
+      receiptDate = entity.normalizedValue.text
+    }
+
+    if (key === 'purchase_time') {
+      receiptTime = textValue
+    }
+
+    if (key === 'total_amount') {
+      // Access the total_amount value
+      totalAmount = entity.normalizedValue.text
+    }
   }
-  
+  // console.log('Supplier Name:', supplierName)
+  // console.log('Purchase Date:', receiptDate)
+  // console.log('Purchase Time:', receiptTime)
+  // console.log('Total Amount:', totalAmount)
+  return {
+    supplierName,
+    receiptDate,
+    receiptTime,
+    totalAmount,
+  };
 }
 
-await processDocument()
+console.log(await processDocument())
