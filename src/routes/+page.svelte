@@ -1,3 +1,4 @@
+<!-- // Xintian -->
 <script>
     import Chart from 'chart.js/auto'
     import { onMount } from 'svelte';
