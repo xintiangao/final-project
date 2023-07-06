@@ -1,4 +1,16 @@
 <script>
+import { onMount } from "svelte";
+import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
+	import { data } from "../utils";
+
+let expenseData = [];
+
+async function fetchExpenseData() {
+    expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + '/expense-input').then((response) => response.json());
+  }
+
+onMount(fetchExpenseData);
+
 function sortByAmount() {
   const tableBody = document.querySelector('table tbody');
   const rows = Array.from(tableBody.querySelectorAll('tr'));
@@ -8,23 +20,36 @@ function sortByAmount() {
     const amountB = parseInt(b.children[2].textContent);
     return amountB - amountA;
   });
-
   rows.forEach((row) => tableBody.appendChild(row));
 }
 
 function sortByDate() {
-    const tbody = document.querySelector('table tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
+  let created = []
 
-    rows.sort((a, b) => {
-      const date1 = new Date(a.children[4].textContent);
-      const date2 = new Date(b.children[4].textContent);
-      return date2 - date1;
-    });
-
-    rows.forEach((row) => tbody.appendChild(row));
+  for ( let i = 0; i < expenseData.length; i++ ){
+    created.push(expenseData[i].date);
   }
 
+  created.sort((a, b) => new Date(b) - new Date(a));
+}
+
+let editedExpense = null;
+
+function startEditing(expense) {
+  editedExpense = { ...expense };
+}
+
+function cancelEditing() {
+  editedExpense = null;
+}
+
+function saveExpense() {
+  const index = expenseData.findIndex((expense) => expense.id === editedExpense.id);
+  if (index !== -1) {
+    expenseData[index] = { ...editedExpense };
+  }
+  editedExpense = null;
+}
 </script>
 
 <container class="first-letter:uppercase ">
@@ -54,50 +79,46 @@ function sortByDate() {
             </tr>
           </thead>
           <tbody>
+            {#each expenseData as expense}
             <!-- row 1 -->
             <tr class="hover">
-              <th>1</th>
-              <td>Gas</td>
-              <td>80</td>
-              <td>Driving is fun</td>
-              <td>2023-07-04</td>
+              {#if editedExpense && editedExpense.id === expense.id}
+          <!-- Edit mode -->
+          <td></td>
+          <td>
+            <input type="text" bind:value={editedExpense.category} />
+          </td>
+          <td>
+            <input type="text" bind:value={editedExpense.amount} />
+          </td>
+          <td>
+            <input type="text" bind:value={editedExpense.note} />
+          </td>
+          <td>
+            <input type="date" bind:value={editedExpense.date} />
+          </td>
+          <td>
+            <button on:click={saveExpense}>Save</button>
+            <button on:click={cancelEditing}>Cancel</button>
+          </td>
+          {:else}
+            <th></th>
+            <td>{expense.category}</td>
+            <td>{expense.amount}</td>
+            {#if expense.note == null}
+            <td></td>
+            {:else}
+            <td>{expense.note}</td>
+            {/if}
+            <td>{new Date(expense.date).toLocaleDateString()}</td>
               <td>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
+                <button  on:click={() => startEditing(expense)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
+                </button>
               </td>
+              {/if}
             </tr>
-            <!-- row 2 -->
-            <tr class="hover">
-              <th>2</th>
-              <td>Food</td>
-              <td>120</td>
-              <td>Yummy</td>
-              <td>2023-08-19</td>
-              <td>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
-              </td>
-            </tr>
-            <!-- row 3 -->
-            <tr class="hover">
-              <th>3</th>
-              <td>Rent</td>
-              <td>1200</td>
-              <td>Crib</td>
-              <td>2023-06-02</td>
-              <td>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
-              </td>
-            </tr>
-            <tr>
-              <th>4</th>
-              <td>Gas</td>
-              <td>80</td>
-              <td>I drive too much</td>
-              <td>2022-12-09</td>
-              <td>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
-              </td>
-            </tr>
-              
+            {/each}
           </tbody>
         </table>
       </div>

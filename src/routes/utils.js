@@ -1,11 +1,11 @@
-import { getTokenFromLocalStorage } from "../utils/auth";
+import { getTokenFromLocalStorage, getUserId } from "../utils/auth";
 import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
 export let data
 
 let loading=false;
 let formErrors = {};
 
-let rowCounter = 2;
+    let rowCounter = 2;
     export function addRow() {
         rowCounter++;
         const newRow = `
@@ -62,14 +62,13 @@ let rowCounter = 2;
         document.getElementById('goalRows').insertAdjacentHTML('beforeend', newRow);
     }
 
-
     export async function uploadExpenses(evt) {
 		evt.preventDefault();
 		formErrors = {
         category: '',
         amount: '',
         date:'',
-        // note: '',
+        note: '',
 		}; 
 
 		if (!evt.target['category'].value) {
@@ -88,10 +87,15 @@ let rowCounter = 2;
 			formErrors.title = '';
 		}
 		loading=true;
+
+        let userId = parseInt(getUserId())
+
 		const expenseData = {
 			category: evt.target['category'].value,
-			amount: evt.target['amount'].value,
-			date: evt.target['date'].value
+			amount: parseInt(evt.target['amount'].value),
+			date: evt.target['date'].value,
+            userId: userId,
+            note: evt.target['note'].value
 		};
 
 		let token = getTokenFromLocalStorage();
@@ -103,8 +107,9 @@ let rowCounter = 2;
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`
 			},
-
 			body: JSON.stringify(expenseData)
+
+            
 		}).catch((error) => {
 			console.error('Error:', error);
 		});

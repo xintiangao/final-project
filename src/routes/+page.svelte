@@ -108,7 +108,7 @@ onMount(async () => {
                 <tr>
                   <th>
                     <div>
-                      <button type="button" onclick="addRow()">
+                      <button type="button" on:click={addRow}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <line x1="12" y1="5" x2="12" y2="19"></line>
                           <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -119,6 +119,7 @@ onMount(async () => {
                   <th class="font-bold text-xl">Category</th>
                   <th class="font-bold text-xl">Amount</th>
                   <th class="font-bold text-xl">Date</th>
+                  <th class="font-bold text-xl">Note</th>
                 </tr>
               </thead>
               <tbody id="expenseRows">
@@ -142,53 +143,8 @@ onMount(async () => {
                   </td>
                   <td><input name="amount" type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
                   <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
+                  <td><input name="amount" type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
                 </tr>
-                <!-- row 2 -->
-                <tr>
-                  <th>2</th>
-                  <td>
-                    <div class="dropdown dropdown-bottom flex flex-start">
-                      <label>
-                        <select name="category" class="select select-bordered w-32">
-                          <option disabled selected class="w-auto">category</option>
-                          <option>Food</option>
-                          <option>Gas</option>
-                          <option>rent</option>
-                          <option>transport</option>
-                          <option>entertainment</option>
-                          <option>clothes</option>
-                          <option>subscription</option>
-                          <option>others</option>
-                        </select>
-                      </label>
-                    </div>
-                  </td>
-                  <td><input name="amount" type="text" placeholder="99.99" class="w-24 input input-bordered input-primary max-w-xs" /></td>
-                  <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
-                </tr>
-                <!-- row 2 -->
-                <tr>
-                    <th>3</th>
-                    <td>
-                      <div class="dropdown dropdown-bottom flex flex-start">
-                        <label>
-                          <select name="category" class="select select-bordered w-32">
-                            <option disabled selected class="w-auto">category</option>
-                            <option>Food</option>
-                            <option>Gas</option>
-                            <option>rent</option>
-                            <option>transport</option>
-                            <option>entertainment</option>
-                            <option>clothes</option>
-                            <option>subscription</option>
-                            <option>others</option>
-                          </select>
-                        </label>
-                      </div>
-                    </td>
-                    <td><input name="amount" type="text" placeholder="99.99" class="w-24 input input-bordered input-primary max-w-xs" /></td>
-                    <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
-                  </tr>
               </tbody>
             </table>
             <div class="flex content-center justify-center align-middle items-center m-2 ">
