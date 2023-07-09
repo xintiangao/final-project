@@ -2,9 +2,9 @@
 <script>
   import Chart from 'chart.js/auto'
   import { onMount } from 'svelte';
-  import { createEventDispatcher } from 'svelte';
   import { addRow, uploadExpenses } from './utils.js'
   import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
+  
   
   let expenseData = [];
 
@@ -232,9 +232,8 @@
     });
   });
 
-  let cashbackPercentage = ""; // Initialize the cashbackPercentage variable
+  let cashbackPercentage = ""; 
 
-  // Function to handle category change event
   function handleCategoryChange(event, bankIndex) {
     const selectedCategory = event.target.value;
     const bankName = event.target.parentNode.parentNode.querySelector(".font-semibold").textContent.trim();
@@ -340,7 +339,7 @@ function getCashbackPercentage(bank, category) {
           <div class="stat-title">Total Saving</div>
           <div class="stat-value">$89,400</div>
           <div class="stat-actions">
-            <button class="btn btn-sm">Post to community</button> 
+            <a class="btn btn-sm" href='/community'>Post to community</a> 
           </div>
         </div>
         

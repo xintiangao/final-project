@@ -5,11 +5,13 @@
   export let data;
 
  
-  let expenseData = [];
+  let expense = [];
+  let successMessage = false;
   
   async function fetchExpenseData() {
-      expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
+    expense = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
   }
+
   
   onMount(fetchExpenseData);
   
@@ -24,22 +26,26 @@
     });
     rows.forEach((row) => tableBody.appendChild(row));
   }
-  
+
   function sortByDate() {
-    let created = []
+    const tableBody = document.querySelector('table tbody');
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
   
-    for ( let i = 0; i < expenseData.length; i++ ){
-      created.push(expenseData[i].date);
-    }
-    created.sort((a, b) => new Date(b) - new Date(a));
+    rows.sort((a, b) => {
+      const dateA = new Date(a.children[4].textContent).toISOString;
+      const dateB = new Date(b.children[4].textContent).toISOString;
+      return dateB - dateA;
+    });
+    rows.forEach((row) => tableBody.appendChild(row));
   }
-  
+
+
   function startEditing(expense) {
     editedExpense = { ...expense };
     category = editedExpense.category;
     amount = editedExpense.amount.toString();
     note = editedExpense.note;
-    date = editedExpense.date;
+    date = new Date(editedExpense.date).toLocaleDateString();
   }
   
   function cancelEditing() {
@@ -47,31 +53,33 @@
   }
   
   let editedExpense = {
+    id:'',
     category: '',
     amount: '',
     note: '',
     date: ''
   };
 
-  let category = data.category;
-  let amount = data.amount;
-  let note = data.note;
-  let date = data.date; 
+  let category = "";
+  let amount = "";
+  let note = "";
+  let date = "";
   
   async function updateExpenses(evt) {
     evt.preventDefault();
-  
-    let userId = parseInt(getUserId())
-  
-    const expenseData = {
-      id: data.expense[0].id,
-      category: evt.target['category'].value,
-      amount: parseInt(evt.target['amount'].value),
-      date: evt.target['date'].value,
+
+    const userId = parseInt(getUserId());
+
+    expense = await fetch(PUBLIC_BACKEND_BASE_URL + '/expense-input').then((response) => response.json());
+
+    const updateData = {
+      id: parseInt(editedExpense.id),
+      category: evt.target["category"].value,
+      amount: parseInt(evt.target["amount"].value),
+      date: evt.target["date"].value ? new Date(evt.target["date"].value) : null,
       userId: userId,
-      note: evt.target['note'].value
+      note: evt.target["note"].value,
     };
-  
     // let token = getTokenFromLocalStorage();
   
     const resp = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input/${expense.id}`, {
@@ -82,18 +90,27 @@
         // Authorization: `Bearer ${token}`
         Authorization: getTokenFromLocalStorage()
       },
-      body: JSON.stringify(expenseData)
+      body: JSON.stringify(updateData)
   
     });
      if (resp.status == 200) {
+      successMessage = true;
+      cancelEditing();
      } else {
         console.error('Failed to create record:', error);
       }
   }
+ 
   
   </script>
   
   <container class="first-letter:uppercase ">
+    {#if successMessage}
+    <div class="alert alert-success">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <span>The expense has been updated!</span>
+    </div>
+  {/if}
       <div class="overflow-x-auto m-10">
         <form on:submit={updateExpenses}>
           <table class="table font-mono p-10">
@@ -116,12 +133,12 @@
                 <th>Category</th>
                 <th>Amount</th>
                 <th>Note</th>
-                <th>Date Created</th>
+                <th>Date</th>
                 <th>Edit</th>
               </tr>
             </thead>
             <tbody>
-              {#each expenseData as expense}
+              {#each expense as expense}
               <!-- row 1 -->
               <tr class="hover">
               {#if editedExpense && editedExpense.id === expense.id}
