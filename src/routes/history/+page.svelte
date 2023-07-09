@@ -3,11 +3,12 @@
   import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
   import { getTokenFromLocalStorage, getUserId } from "../../utils/auth";
   export let data;
-  console.log([data.expense[0].id])
+
+ 
   let expenseData = [];
   
   async function fetchExpenseData() {
-      expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + '/expense-input').then((response) => response.json());
+      expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
   }
   
   onMount(fetchExpenseData);
@@ -35,6 +36,10 @@
   
   function startEditing(expense) {
     editedExpense = { ...expense };
+    category = editedExpense.category;
+    amount = editedExpense.amount.toString();
+    note = editedExpense.note;
+    date = editedExpense.date;
   }
   
   function cancelEditing() {
@@ -67,14 +72,15 @@
       note: evt.target['note'].value
     };
   
-    let token = getTokenFromLocalStorage();
+    // let token = getTokenFromLocalStorage();
   
-    const resp = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input/${expenseData.id}`, {
+    const resp = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input/${expense.id}`, {
       method: 'PATCH',
       mode: 'cors',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        // Authorization: `Bearer ${token}`
+        Authorization: getTokenFromLocalStorage()
       },
       body: JSON.stringify(expenseData)
   
@@ -173,7 +179,8 @@
               {/if}
               <td>{new Date(expense.date).toLocaleDateString()}</td>
                 <td>
-                  <button  on:click={() => startEditing(expense)}>
+                  <!-- <a class="font-bold text-2xl" href="/history/{expense.id}">Edit</a> -->
+                  <button on:click={() => startEditing(expense)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
                   </button>
                 </td>

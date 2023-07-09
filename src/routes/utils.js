@@ -16,14 +16,9 @@ let formErrors = {};
                         <label>
                             <select class="select select-bordered w-32">
                                 <option disabled selected>category</option>
-                                <option>Food</option>
-                                <option>Gas</option>
-                                <option>rent</option>
-                                <option>transport</option>
-                                <option>entertainment</option>
-                                <option>clothes</option>
-                                <option>subscription</option>
-                                <option>others</option>
+                                {#each ['Clothes', 'Dining', 'Drug Store', 'Entertainment', 'Gas', 'Grocery', 'Others', 'Rent', 'Subscription', 'Transport', 'Travel'] as option}
+                                <option value={option.toLowerCase()}>{option}</option>
+                                {/each}
                             </select>
                         </label>
                     </div>
@@ -45,14 +40,17 @@ let formErrors = {};
                         <label>
                             <select class="select select-bordered w-32">
                                 <option disabled selected>category</option>
-                                <option>Food</option>
+                                <option>Dining</option>
+                                <option>Grocery</option>
+                                <option>Drug Store</option>
                                 <option>Gas</option>
-                                <option>rent</option>
-                                <option>transport</option>
-                                <option>entertainment</option>
-                                <option>clothes</option>
-                                <option>subscription</option>
-                                <option>others</option>
+                                <option>Rent</option>
+                                <option>Transport</option>
+                                <option>Entertainment</option>
+                                <option>Clothes</option>
+                                <option>Subscription</option>
+                                <option>Travel</option>
+                                <option>Others</option>
                             </select>
                         </label>
                     </div>
