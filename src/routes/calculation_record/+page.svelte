@@ -123,19 +123,19 @@
             </tr>
             <tr>
                 <td class="pr-4">Estimate income per month:</td>
-                <td>MYR {history.incomePerMonth}</td>
+                <td>$ {history.incomePerMonth}</td>
             </tr>
             <tr>
                 <td class="pr-4">Total expenses per month:</td>
-                <td>MYR {history.expensesPerMonth}</td>
+                <td>$ {history.expensesPerMonth}</td>
             </tr>
             <tr>
                 <td class="pr-4">Balance per month:</td>
-                <td class="font-bold">MYR {history.balancePerMonth}</td>
+                <td class="font-bold">$ {history.balancePerMonth}</td>
             </tr>
             <tr>
                 <td class="pr-4">Target saving amount:</td>
-                <td>MYR {history.totalSaving}</td>
+                <td>$ {history.totalSaving}</td>
             </tr>
             <tr>
                 <td class="pr-4">Estimate time to achieve the target:</td>
@@ -143,7 +143,7 @@
             </tr>
             <tr>
                 <td class="pr-4">Target need to save per month:</td>
-                <td class="font-bold">MYR {history.savingsPerMonth}</td>
+                <td class="font-bold">$ {history.savingsPerMonth}</td>
             </tr>
         </tbody>
         </table>
