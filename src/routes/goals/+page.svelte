@@ -163,7 +163,7 @@ let categories = [{name: "food", value:""},
             </label>
 
             <div class="border border-gray-300 rounded-xl inline-flex flex-grow">
-                <span class="p-2 mt-1">MYR</span>
+                <span class="p-2 mt-1 text-gray-500">$</span>
                     <input type="number" name="target-saving-amount" class="input focus:outline-none w-44 p-2" 
                     bind:value={totalSaving} />
             </div>
@@ -193,7 +193,7 @@ let categories = [{name: "food", value:""},
 
         <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none w-10">
-                <span class="text-gray-500 sm:text-sm">MYR</span>
+                <span class="text-gray-500 sm:text-sm">$</span>
             </div>
             <input type="number" name="incomeValue" 
             class="input border border-gray-300 rounded-xl focus:outline-none w-96 pl-20"
@@ -219,7 +219,7 @@ let categories = [{name: "food", value:""},
                 <!-- input expense value for particular category -->
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none w-10">
-                        <span class="text-gray-500 sm:text-sm">MYR</span>
+                        <span class="text-gray-500 sm:text-sm">$</span>
                     </div>
                     <input type="number" name="categoryValue" 
                     class="input border border-gray-300 rounded-xl flex-grow focus:outline-none w-44 ml-1 pl-20"
@@ -258,19 +258,19 @@ let categories = [{name: "food", value:""},
                     </tr>
                     <tr>
                         <td class="pr-4">Estimate income per month:</td>
-                        <td>MYR {income}</td>
+                        <td>$ {income}</td>
                     </tr>
                     <tr>
                         <td class="pr-4">Total expenses per month:</td>
-                        <td>MYR {total_expenses}</td>
+                        <td>$ {total_expenses}</td>
                     </tr>
                     <tr>
                         <td class="pr-4">Balance per month:</td>
-                        <td class="font-bold">MYR {balance_per_month}</td>
+                        <td class="font-bold">$ {balance_per_month}</td>
                     </tr>
                     <tr>
                         <td class="pr-4">Target saving amount:</td>
-                        <td>MYR {totalSaving}</td>
+                        <td>$ {totalSaving}</td>
                     </tr>
                     <tr>
                         <td class="pr-4">Estimate time to achieve the target:</td>
@@ -278,7 +278,7 @@ let categories = [{name: "food", value:""},
                     </tr>
                     <tr>
                         <td class="pr-4">Target need to save per month:</td>
-                        <td class="font-bold">MYR {finalSavings}</td>
+                        <td class="font-bold">$ {finalSavings}</td>
                     </tr>
                 </tbody>
             </table>
