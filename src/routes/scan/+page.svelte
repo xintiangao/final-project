@@ -3,9 +3,11 @@
     import { afterUpdate } from 'svelte';
   
     let result = {};
+    let selectedImage = null;
   
     async function parseDocument(evt) {
       try {
+        selectedImage = URL.createObjectURL(evt.target['file'].files[0]);
         result = await processDocument(evt.target['file'].files[0]);
       } catch (error) {
         console.error("An error occurred:", error);
@@ -15,7 +17,7 @@
   
     // Use afterUpdate to trigger UI updates after the result is updated
     afterUpdate(() => {
-      console.log(result.supplierName);
+      console.log(result);
     });
   </script>
   
@@ -63,9 +65,16 @@
       </div>
     </form>
   
+    {#if selectedImage}
+      <div class="image-preview">
+        <h3>Image Preview:</h3>
+        <img src="{selectedImage}" alt="Selected Image" />
+      </div>
+    {/if}
+  
     <div>
       <h3>Parsing Result:</h3>
-      {#if result.supplierName}
+      {#if result}
         <p><strong>Supplier Name:</strong> {result.supplierName}</p>
         <p><strong>Purchase Date:</strong> {result.receiptDate}</p>
         <p><strong>Purchase Time:</strong> {result.receiptTime}</p>
