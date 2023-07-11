@@ -2,36 +2,55 @@
 <script>
   import Chart from 'chart.js/auto'
   import { onMount } from 'svelte';
-  import { addRow, uploadExpenses } from './utils.js'
+  import { addRow, uploadExpenses, addIncomeRow, uploadIncome } from './utils.js'
   import { getUserId } from "../utils/auth"
   import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
 
   let expenseData = [];
+  let incomeData =[];
 
   async function fetchExpenseData() {
     expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
   }
 
+  async function fetchIncomeData() {
+    incomeData = await fetch(PUBLIC_BACKEND_BASE_URL + `/income`).then((response) => response.json());
+  }
   onMount(fetchExpenseData);
+  onMount(fetchIncomeData);
 
-  export function calculateTotal(expenses) {
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
-    
-        let total = 0;
-        expenses.forEach((expense) => {
-          const expenseDate = new Date(expense.date);
-          const expenseMonth = expenseDate.getMonth();
-          const expenseYear = expenseDate.getFullYear();
-    
-          if (expenseMonth === (currentMonth) && expenseYear === currentYear) {
-            total += expense.amount;
-          }
-        });
-    
-        return total;
-      }
+function calculateTotal(expenses) {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  let total = 0;
+  expenses.forEach((expense) => {
+    const expenseDate = new Date(expense.date);
+    const expenseMonth = expenseDate.getMonth();
+    const expenseYear = expenseDate.getFullYear();
+
+    if (expenseMonth === (currentMonth) && expenseYear === currentYear) {
+      total += expense.amount;
+    }
+  });
+
+  return total;
+}
+
+function calculateIncome(incomeData) {
+  let totalIncome = 0;
+
+  incomeData.forEach((income) => {
+    const salary = income.monthlyincome || 0;
+    const others = income.otherincome || 0;
+    totalIncome += salary + others;
+  });
+
+  return totalIncome;
+}
+
+
 
   function calculateTotalForThreeMonths(expenses) {
     const currentDate = new Date();
@@ -306,7 +325,7 @@ async function postToCommunity() {
 
 </script>
 
-<container class="flex justify-around content-center">
+<container class="flex justify-around">
   <div class="rounded-box place-items-center w-[50%] h-[80%] flex flex-wrap justify-around content-stretch">
     <div class="rounded-box w-[100%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
       <form on:submit|preventDefault={uploadExpenses}>
@@ -368,7 +387,7 @@ async function postToCommunity() {
         
         <div class="stat">
           <div class="stat-title">Total Saving</div>
-          <div class="stat-value">$89,400</div>
+          <div class="stat-value">${calculateTotal(expenseData)}</div>
           <div class="stat-actions">
             <a class="btn btn-sm" href='/community' on:click={postToCommunity}>Post to community</a> 
           </div>
@@ -390,7 +409,9 @@ async function postToCommunity() {
       </div> 
     </div>
   </div>
-  <div class="rounded-box place-items-center w-[45%] h-[100%] flex flex-wrap bg-primary m-2 drop-shadow-lg">
+
+<div class="rounded-box">
+  <div class="rounded-box place-items-center w-[100%] h-auto flex flex-wrap bg-primary drop-shadow-lg mb-2">
     <table id="bankTable" class="table table-pin-rows font-mono h-[100%]">
       <!-- head -->
       <thead>
@@ -462,4 +483,73 @@ async function postToCommunity() {
       </tbody>
     </table>
   </div>
+
+  <div class="rounded-box place-items-center w-full h-96 bg-primary mr-2 drop-shadow-lg overflow-scroll">
+        <form on:submit|preventDefault={uploadIncome}>
+          <table class="table table-pin-rows font-mono">
+            <!-- head -->
+            <thead>
+              <tr>
+                <th>
+                  <div>
+                    <button type="button" on:click={addIncomeRow}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </th>
+                <th class="font-bold text-xl">Income</th>
+                <th class="font-bold text-xl">Amount</th>
+                <th class="font-bold text-xl">Date</th>
+                <th class="font-bold text-xl">Note</th>
+              </tr>
+            </thead>
+            <tbody id="incomeRows">
+              <!-- row 1 -->
+              <tr>
+                <th>1</th>
+                <td>
+                  <div class="dropdown dropdown-bottom flex flex-start">
+                    <select name="income" class="select select-bordered w-32">
+                      <option disabled selected>income</option>
+                      {#each ['salary','gift', 'stocks', 'rent', 'sales', 'others'] as option}
+                      <option value={option.toLowerCase()}>{option}</option>
+                      {/each}
+                    </select>
+                  </div>
+                </td>
+                <td><input name="incomeAmount" type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
+                <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
+                <td><input name="note" type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
+              </tr>
+              <!-- row 2 -->
+              <tr>
+                <th>2</th>
+                <td>
+                  <div class="dropdown dropdown-bottom flex flex-start">
+                    <select name="income" class="select select-bordered w-32">
+                      <option disabled selected>income</option>
+                      {#each ['salary','gift', 'stocks', 'rent', 'sales', 'others'] as option}
+                      <option value={option.toLowerCase()}>{option}</option>
+                      {/each}
+                    </select>
+                  </div>
+                </td>
+                <td><input name="incomeAmount" type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
+                <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
+                <td><input name="note" type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="flex content-center justify-center align-middle items-center m-2 ">
+            <button type="submit" class="btn drop-shadow-lg">Submit</button>
+          </div>
+        </form>
+      </div>
+</div>
+
 </container>
+
+

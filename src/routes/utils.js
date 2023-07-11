@@ -8,8 +8,6 @@ let expenseData = [];
 async function fetchExpenseData() {
   expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
 }
-
-
 let loading=false;
 let formErrors = {};
 
@@ -38,6 +36,33 @@ let formErrors = {};
         document.getElementById('expenseRows').insertAdjacentHTML('beforeend', newRow);
     }
 
+const incomeRows = document.getElementById("incomeRows");
+
+let rowCount = 2;
+
+export function addIncomeRow() {
+  rowCount++
+  const newRow = `
+    <th>${rowCount}</th>
+    <td>
+      <div class="dropdown dropdown-bottom flex flex-start">
+        <select name="income" class="select select-bordered w-32">
+          <option disabled selected>income</option>
+          ${['salary','gift', 'stocks', 'rent', 'sales', 'others'].map(option => `
+            <option value="${option.toLowerCase()}">${option}</option>
+          `).join('')}
+        </select>
+      </div>
+    </td>
+    <td><input name="incomeAmount" type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
+    <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
+    <td><input name="note" type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
+  `;
+
+  document.getElementById('incomeRows').insertAdjacentHTML('beforeend', newRow);
+}
+
+    
     export async function uploadExpenses(evt) {
 		evt.preventDefault();
 		formErrors = {
@@ -94,6 +119,41 @@ let formErrors = {};
 			loading=false;
 		} else {
 			console.log('Failed to upload expense');
+		}
+	}
+
+	export async function uploadIncome(evt) {
+		evt.preventDefault();
+		console.log(evt.target['income'].value)
+		
+    	let userId = parseInt(getUserId());
+		let income = evt.target['income'].value;
+		let amount = parseInt(evt.target['incomeAmount'].value);
+		let date = new Date (evt.target['date'].value);
+
+		const incomeData = {
+			income: income,
+			amount: amount,
+			date: date,
+			userId: userId,
+			note: evt.target['note'].value,
+		};
+		console.log(incomeData)
+
+		let token = getTokenFromLocalStorage();
+
+		const resp = await fetch(PUBLIC_BACKEND_BASE_URL + '/income-input', {
+			method: 'POST',
+			mode: 'cors',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(incomeData)
+		})
+		if (resp && resp.status == 200) {
+			location.reload()
+		} else {
+			console.log('Failed to upload income');
 		}
 	}
  
