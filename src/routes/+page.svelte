@@ -3,9 +3,9 @@
   import Chart from 'chart.js/auto'
   import { onMount } from 'svelte';
   import { addRow, uploadExpenses } from './utils.js'
+  import { getUserId } from "../utils/auth"
   import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
-  
-  
+
   let expenseData = [];
 
   async function fetchExpenseData() {
@@ -14,24 +14,24 @@
 
   onMount(fetchExpenseData);
 
-  function calculateTotal(expenses) {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-
-    let total = 0;
-    expenses.forEach((expense) => {
-      const expenseDate = new Date(expense.date);
-      const expenseMonth = expenseDate.getMonth();
-      const expenseYear = expenseDate.getFullYear();
-
-      if (expenseMonth === (currentMonth) && expenseYear === currentYear) {
-        total += expense.amount;
+  export function calculateTotal(expenses) {
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+    
+        let total = 0;
+        expenses.forEach((expense) => {
+          const expenseDate = new Date(expense.date);
+          const expenseMonth = expenseDate.getMonth();
+          const expenseYear = expenseDate.getFullYear();
+    
+          if (expenseMonth === (currentMonth) && expenseYear === currentYear) {
+            total += expense.amount;
+          }
+        });
+    
+        return total;
       }
-    });
-
-    return total;
-  }
 
   function calculateTotalForThreeMonths(expenses) {
     const currentDate = new Date();
@@ -154,7 +154,6 @@
       const totalAmount = calculateTotalForThreeMonths(filteredExpenses);
       labels.push(monthName);
       data.push(totalAmount);
-      console.log(data)
     }
 
     new Chart(lineChart, {
@@ -273,6 +272,38 @@ function getCashbackPercentage(bank, category) {
     }
   } 
 }
+
+async function postToCommunity() {
+  const totalSpend = calculateTotal(expenseData);
+  const totalSaving = 89400;
+  const userId = parseInt(getUserId());
+
+  const postData = {
+    userId: userId,
+    totalSpend,
+    totalSaving,
+  };
+
+  try {
+    const response = await fetch(PUBLIC_BACKEND_BASE_URL + '/community', {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postData),
+    });
+
+    if (response && response.status === 201) {
+      console.log('Post created successfully!');
+    } else {
+      console.error('Error creating post:', error);
+    }
+  } catch (error) {
+    console.error('Error creating post:', error);
+  }
+}
+
 </script>
 
 <container class="flex justify-around content-center">
@@ -339,7 +370,7 @@ function getCashbackPercentage(bank, category) {
           <div class="stat-title">Total Saving</div>
           <div class="stat-value">$89,400</div>
           <div class="stat-actions">
-            <a class="btn btn-sm" href='/community'>Post to community</a> 
+            <a class="btn btn-sm" href='/community' on:click={postToCommunity}>Post to community</a> 
           </div>
         </div>
         
@@ -381,8 +412,8 @@ function getCashbackPercentage(bank, category) {
             <select id="categorySelect1" class="select select-bordered w-32" on:change={(event) => handleCategoryChange(event, 1)}>
               <option disabled selected class="w-auto">category</option>
               {#each ['Clothes', 'Dining', 'Drug Store', 'Entertainment', 'Gas', 'Grocery', 'Others', 'Rent', 'Subscription', 'Transport', 'Travel'] as option}
-              <option value={option.toLowerCase()}>{option}</option>
-            {/each}
+                <option value={option.toLowerCase()}>{option}</option>
+              {/each}
             </select>
           </td>
           <td>

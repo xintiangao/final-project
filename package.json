@@ -27,6 +27,7 @@
 	"type": "module",
 	"dependencies": {
 		"@tailwindcss/typography": "^0.5.9",
-		"chart.js": "^4.3.0"
+		"chart.js": "^4.3.0",
+		"html2canvas": "^1.4.1"
 	}
 }

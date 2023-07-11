@@ -12,7 +12,6 @@
     expense = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
   }
 
-  
   onMount(fetchExpenseData);
   
   function sortByAmount() {
@@ -65,6 +64,13 @@
   let note = "";
   let date = "";
   
+  function showSuccessMessage() {
+    successMessage = true;
+    setTimeout(() => {
+      successMessage = false;
+    }, 2000);
+  }
+
   async function updateExpenses(evt) {
     evt.preventDefault();
 
@@ -74,7 +80,7 @@
 
     const updateData = {
       id: parseInt(editedExpense.id),
-      category: evt.target["category"].value,
+      category: (evt.target["category"].value).toLowerCase(),
       amount: parseInt(evt.target["amount"].value),
       date: evt.target["date"].value ? new Date(evt.target["date"].value) : null,
       userId: userId,
@@ -94,7 +100,7 @@
   
     });
      if (resp.status == 200) {
-      successMessage = true;
+      showSuccessMessage();
       cancelEditing();
      } else {
         console.error('Failed to create record:', error);
@@ -104,12 +110,14 @@
   
   </script>
   
-  <container class="first-letter:uppercase ">
-    {#if successMessage}
-    <div class="alert alert-success">
+<container class="first-letter:uppercase ">
+  {#if successMessage}
+  <div  class="flex justify-center">
+    <div class="alert alert-success rounded-lg w-[80%]">
       <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
       <span>The expense has been updated!</span>
     </div>
+  </div>
   {/if}
       <div class="overflow-x-auto m-10">
         <form on:submit={updateExpenses}>
@@ -149,14 +157,9 @@
                 <label for="category"></label>
                 <select name="category" bind:value={category} required>
                   <option disabled selected>Choose a category</option>
-                  <option>Food</option>
-                  <option>Gas</option>
-                  <option>Rent</option>
-                  <option>Transport</option>
-                  <option>Entertainment</option>
-                  <option>Clothes</option>
-                  <option>Subscription</option>
-                  <option>Others</option>
+                  {#each ['Clothes', 'Dining', 'Drug Store', 'Entertainment', 'Gas', 'Grocery', 'Others', 'Rent', 'Subscription', 'Transport', 'Travel'] as option}
+                    <option value={option.toLowerCase()}>{option}</option>
+                  {/each}
                 </select>
               </div>
             </td>
