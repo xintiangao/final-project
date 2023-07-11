@@ -13,6 +13,8 @@
   }
   if (Object.keys(params).length > 0) {
     localStorage.setItem('oauth2', JSON.stringify(params) );
+    //hide the access token from url
+    window.history.pushState({}, document.title, "/" + "signup")
     if (params['state'] && params['state'] == 'try_sample_request') {
       trySampleRequest();
     }

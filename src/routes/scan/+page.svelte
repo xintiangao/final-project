@@ -17,7 +17,7 @@
   
     // Use afterUpdate to trigger UI updates after the result is updated
     afterUpdate(() => {
-      console.log(result);
+      // console.log(result);
     });
   </script>
   
@@ -64,14 +64,16 @@
         <button class="btn">Parse Document</button>
       </div>
     </form>
-  
+  <!-- preview image on click -->
     {#if selectedImage}
       <div class="image-preview">
         <h3>Image Preview:</h3>
+        <!-- svelte-ignore a11y-img-redundant-alt -->
         <img src="{selectedImage}" alt="Selected Image" />
       </div>
     {/if}
   
+    <!-- return results -->
     <div>
       <h3>Parsing Result:</h3>
       {#if result}
