@@ -1,8 +1,8 @@
-<script>
+<!-- <script>
   import { PUBLIC_CLIENT_ID } from '$env/static/public'
 
   var YOUR_CLIENT_ID = PUBLIC_CLIENT_ID;
-  var YOUR_REDIRECT_URI = 'http://localhost:5173/signup';
+  var YOUR_REDIRECT_URI = 'http://localhost:5173/scan';
   var fragmentString = location.hash.substring(1);
 
   // Parse query string to see if page request is coming from OAuth 2.0 server.
@@ -77,5 +77,35 @@
     form.submit();
   }
 </script>
-  
+
+<style>
+  .google-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+  }
+
+  .google-button__logo {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+  }
+</style>
+
 <button class="btn" on:click={oauth2SignIn}>Log In with Google</button>
+
+<button id="signin-button" class="google-button" on:click={oauth2SignIn}>
+  <img
+    src="https://developers.google.com/identity/images/g-logo.png"
+    alt="Sign in with Google"
+    class="google-button__logo"
+  />
+  Sign in with Google
+</button> -->

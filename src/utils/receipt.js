@@ -34,6 +34,7 @@ export async function processDocument(file) {
         });
 
         const result = await response.json();
+        console.log(result)
         console.log('Document processing complete.');
 
         const { document } = result;
