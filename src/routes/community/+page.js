@@ -21,7 +21,6 @@ export async function load({ fetch, params }) {
   const resp = await fetch(PUBLIC_BACKEND_BASE_URL + '/community');
   const res = await resp.json();
 
-  // Fetch expenseData from '/expense-input'
   const expenseResp = await fetch(PUBLIC_BACKEND_BASE_URL + '/expense-input');
   const expenseData = await expenseResp.json();
 
