@@ -9,22 +9,6 @@
   let expenseData = [];
   let incomeData =[];
 
-  //slicing the url for google token
-  var fragmentString = location.hash.substring(1);
-  var params = {};
-  var regex = /([^&=]+)=([^&]*)/g, m;
-  while (m = regex.exec(fragmentString)) {
-    params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
-  }
-  if (Object.keys(params).length > 0) {
-    localStorage.setItem('oauth2', JSON.stringify(params) );
-    //hide the access token from url
-    window.history.pushState({}, document.title, "/" + "signup")
-    if (params['state'] && params['state'] == 'try_sample_request') {
-      trySampleRequest();
-    }
-  }
-
   async function fetchExpenseData() {
     expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
   }
