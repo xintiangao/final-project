@@ -34,5 +34,6 @@
 		"google-auth-library": "^8.9.0",
 		"svelte-google-auth": "^0.7.2",
 		"svelte-kit": "^1.2.0"
+		"html2canvas": "^1.4.1"
 	}
 }

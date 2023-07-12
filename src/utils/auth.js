@@ -7,6 +7,7 @@ const emptyAuth = {
 	accessToken: ''
 };
 
+
 export function goToCreateUser() {
 	goto('/users');
 }
@@ -96,7 +97,8 @@ export async function authenticateUser(email, password) {
 		localStorage.setItem(
 			'auth',
 			JSON.stringify({
-				accessToken: res.accessToken
+				accessToken: res.accessToken,
+				userId : res.userId
 			})
 		);
 
