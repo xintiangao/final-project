@@ -42,7 +42,7 @@ function goToSignInPage() {
       </button>
     </div>
     <div class="navbar-center">
-      <a href='/' class="btn btn-ghost normal-case text-3xl font-mono">
+      <a href='/' class="btn btn-ghost normal-case text-3xl font-mono gap-0">
         <div class="text-primary font-bold">Budget</div>
         <div>Butler</div>
       </a>

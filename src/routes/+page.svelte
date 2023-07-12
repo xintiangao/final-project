@@ -1,23 +1,55 @@
 <!-- // Xintian -->
+<svelte:head>
+  <script src="/aws-sdk-s3.min.js"></script>
+</svelte:head>
 <script>
   import Chart from 'chart.js/auto'
+  import createObserverPlugin from './observer-plugin.js';
   import { onMount } from 'svelte';
-  import { addRow, uploadExpenses, addIncomeRow, uploadIncome } from './utils.js'
+  import html2canvas from 'html2canvas';
+  import { uploadExpenses,  uploadIncome, CalculateTotalSaving } from './utils.js'
   import { getUserId } from "../utils/auth"
+  import { uploadMedia, generateFileWithUniqueName } from "../utils/s3-uploader.js"
   import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
 
+
   let expenseData = [];
-  let incomeData =[];
+  let incomeData = [];
+  let goalData = [];
+  let incomeRows = [];
+  let expenseRows = [];
+  let rowCounter = 1;
+  let expenseRow = 1;
+  let userId = getUserId();
+  let pieChartUrl  = '';
+  let fileName;
+  let selectedCategory = ""; 
+
+
+export function addIncomeRow() {
+      incomeRows = [...incomeRows, {}];
+      rowCounter++;
+    }
+export function addRow() {
+  expenseRows = [...expenseRows, {}];
+  expenseRow++;
+}
 
   async function fetchExpenseData() {
-    expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
+    expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input/${userId}`).then((response) => response.json());
   }
 
   async function fetchIncomeData() {
-    incomeData = await fetch(PUBLIC_BACKEND_BASE_URL + `/income`).then((response) => response.json());
+    incomeData = await fetch(PUBLIC_BACKEND_BASE_URL + `/income-input/${userId}`).then((response) => response.json());
   }
+
+  async function fetchGoalData() {
+    goalData = await fetch(PUBLIC_BACKEND_BASE_URL + `/set-goal/${userId}`).then((response) => response.json());
+  }
+
   onMount(fetchExpenseData);
   onMount(fetchIncomeData);
+  onMount(fetchGoalData);
 
 function calculateTotal(expenses) {
   const currentDate = new Date();
@@ -37,20 +69,6 @@ function calculateTotal(expenses) {
 
   return total;
 }
-
-function calculateIncome(incomeData) {
-  let totalIncome = 0;
-
-  incomeData.forEach((income) => {
-    const salary = income.monthlyincome || 0;
-    const others = income.otherincome || 0;
-    totalIncome += salary + others;
-  });
-
-  return totalIncome;
-}
-
-
 
   function calculateTotalForThreeMonths(expenses) {
     const currentDate = new Date();
@@ -79,7 +97,23 @@ function calculateIncome(incomeData) {
     return total;
   }
 
+  async function capturePieChart() {
+    const canvas = await html2canvas(document.getElementById('pieChart'));
+    pieChartUrl = canvas.toDataURL('image/png');
+    console.log('Pie chart captured:', pieChartUrl);
+  }
+
+  async function uploadPieChart() {
+    fileName ='example-file.png';
+    const response = await fetch(pieChartUrl);
+    const blob = await response.blob();
+    const file = new File([blob], fileName, { type: blob.type });
+
+    const [fileUrl, uploadedFileName] = await uploadMedia(file);
+    console.log('Pie chart uploaded:', fileUrl);
+  }
   let pieChart;
+  
   onMount(
     async () => {
       await fetchExpenseData();
@@ -109,7 +143,8 @@ function calculateIncome(incomeData) {
       const labels = Array.from(labelsMap.keys());
       const data = Array.from(labelsMap.values());
 
-      new Chart(pieChart, {
+      
+  new Chart(pieChart, {
         type: 'pie',
         data: {
           labels: labels,
@@ -119,13 +154,14 @@ function calculateIncome(incomeData) {
           }]
         },
         options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
+          onAnimationComplete: {
+            onComplete: capturePieChart()
           }
-        }
+        },
+        plugins: [createObserverPlugin(capturePieChart)],
       });
+      await capturePieChart();
+      await uploadPieChart();
     }
   );
 
@@ -201,10 +237,8 @@ function calculateIncome(incomeData) {
     });
 
     const totalExpense = dailyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-    // console.log(totalExpense);
     return totalExpense;
   }
-
 
   let barChart;
 
@@ -250,57 +284,67 @@ function calculateIncome(incomeData) {
     });
   });
 
+
   let cashbackPercentage = ""; 
 
   function handleCategoryChange(event, bankIndex) {
-    const selectedCategory = event.target.value;
-    const bankName = event.target.parentNode.parentNode.querySelector(".font-semibold").textContent.trim();
+    selectedCategory = event.target.value.toLowerCase();
 
-    const categorySelectId = `categorySelect${bankIndex}`;
-    const cashbackPercentageId = `cashbackPercentage${bankIndex}`;
+    for (let i = bankIndex + 1; i <= 3; i++) {
+      const categorySelectId = `categorySelect${i}`;
+      const categorySelectElement = document.getElementById(categorySelectId);
+      categorySelectElement.value = selectedCategory;
+    }
+  }
 
-    const categorySelectElement = document.getElementById(categorySelectId);
-    const cashbackPercentageElement = document.getElementById(cashbackPercentageId);
+  function handleCategoryHeaderChange(event) {
+    selectedCategory = event.target.value.toLowerCase();
 
-cashbackPercentageElement.textContent = getCashbackPercentage(bankName, selectedCategory);
-}
-
+    for (let i = 1; i <= 3; i++) {
+      const categorySelectId = `categorySelect${i}`;
+      const categorySelectElement = document.getElementById(categorySelectId);
+      categorySelectElement.value = selectedCategory;
+    }
+  }
 function getCashbackPercentage(bank, category) {
-
-  if (bank === "Discover") {
-    if (category === "gas") {
-      return "5%";
+    if (bank === "Discover") {
+      if (category === "gas") {
+        return "5%";
+      } else {
+        return "1%";
+      }
+    } else if (bank === "Chase Unlimited") {
+      if (category === "travel") {
+        return "5%";
+      } else if (category === "dining" || category === "drug store") {
+        return "3%";
+      } else {
+        return "1.5%";
+      }
+    } else if (bank === "BOA") {
+      if (category === "gas") {
+        return "3%";
+      } else if (category === "grocery") {
+        return "2%";
+      } else {
+        return "1%";
+      }
     } else {
-      return "1%";
+      return "";
     }
-  } else if (bank === "Chase Unlimited") {
-    if (category === "travel") {
-      return "5%";
-    } if (category === "dining" || "drug store") {
-      return "3%";
-  }  else {
-      return "1.5%";
-    }
-  } else if (bank === "BOA") {
-    if (category === "gas") {
-      return "3%";
-    } if (category === "grocery") {
-      return "2%";
-    }else {
-      return "1%";
-    }
-  } 
-}
+  }
 
 async function postToCommunity() {
   const totalSpend = calculateTotal(expenseData);
-  const totalSaving = 89400;
+  const totalSaving = CalculateTotalSaving(expenseData, incomeData);
   const userId = parseInt(getUserId());
+  const chartData = await html2canvas(document.getElementById('pieChart')).then((canvas) => canvas.toDataURL('image/png'));
 
   const postData = {
     userId: userId,
     totalSpend,
     totalSaving,
+    chartData,
   };
 
   try {
@@ -335,8 +379,8 @@ async function postToCommunity() {
             <tr>
               <th>
                 <div>
-                  <button type="button" on:click={addRow}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <button type="button"  on:click={addRow}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <line x1="12" y1="5" x2="12" y2="19"></line>
                       <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
@@ -350,12 +394,13 @@ async function postToCommunity() {
             </tr>
           </thead>
           <tbody id="expenseRows">
+            {#each Array.from({ length: expenseRow }) as _, index}
             <!-- row 1 -->
             <tr>
-              <th>1</th>
+              <th>{index + 1}</th>
               <td>
                 <div class="dropdown dropdown-bottom flex flex-start">
-                  <select name="category" class="select select-bordered w-32">
+                  <select name={`category_${index}`} class="select select-bordered w-32">
                     <option disabled selected>category</option>
                     {#each ['Clothes', 'Dining', 'Drug Store', 'Entertainment', 'Gas', 'Grocery', 'Others', 'Rent', 'Subscription', 'Transport', 'Travel'] as option}
                     <option value={option.toLowerCase()}>{option}</option>
@@ -363,10 +408,11 @@ async function postToCommunity() {
                   </select>
                 </div>
               </td>
-              <td><input name="amount" type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
-              <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
-              <td><input name="note" type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
+              <td><input name={`amount_${index}`} type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
+              <td><input name={`date_${index}`} type="date" class="input input-bordered input-primary w-32" /></td>
+              <td><input name={`note_${index}`} type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
             </tr>
+            {/each}
           </tbody>
         </table>
         <div class="flex content-center justify-center align-middle items-center m-2 ">
@@ -387,10 +433,11 @@ async function postToCommunity() {
         
         <div class="stat">
           <div class="stat-title">Total Saving</div>
-          <div class="stat-value">${calculateTotal(expenseData)}</div>
+          <div class="stat-value">${CalculateTotalSaving(expenseData, incomeData)}</div>
           <div class="stat-actions">
             <a class="btn btn-sm" href='/community' on:click={postToCommunity}>Post to community</a> 
           </div>
+          
         </div>
         
       </div>
@@ -417,11 +464,18 @@ async function postToCommunity() {
       <thead>
         <tr>
           <th class="font-bold text-xl">Bank</th>
-          <th class="font-bold text-xl">Category</th>
+          <th class="font-bold text-xl">
+            <select id="categorySelectHeader" class="select select-bordered w-40 text-xl" on:change={(event) => handleCategoryHeaderChange(event)}>
+              <option disabled selected >Category</option>
+              {#each ['Clothes', 'Dining', 'Drug Store', 'Entertainment', 'Gas', 'Grocery', 'Others', 'Rent', 'Subscription', 'Transport', 'Travel'] as option}
+                <option value={option.toLowerCase()}>{option}</option>
+              {/each}
+            </select>
+          </th>
           <th class="font-bold text-xl">Cash-back %</th>
         </tr>
       </thead>
-      <tbody id="expenseRows">
+      <tbody id="bankRows">
         <!-- row 1 -->
         <tr>
           <td>
@@ -438,9 +492,8 @@ async function postToCommunity() {
             </select>
           </td>
           <td>
-            <span id="cashbackPercentage1" class="font-bold text-xl">{cashbackPercentage}</span>
+            <span id="cashbackPercentage1" class="font-bold text-xl">{getCashbackPercentage("Discover", selectedCategory)}</span>
           </td>
-            
         </tr>
         <!-- row 2 -->
         <tr>
@@ -453,12 +506,12 @@ async function postToCommunity() {
             <select id="categorySelect2" class="select select-bordered w-32" on:change={(event) => handleCategoryChange(event, 2)}>
               <option disabled selected class="w-auto">category</option>
               {#each ['Clothes', 'Dining', 'Drug Store', 'Entertainment', 'Gas', 'Grocery', 'Others', 'Rent', 'Subscription', 'Transport', 'Travel'] as option}
-              <option value={option.toLowerCase()}>{option}</option>
+                <option value={option.toLowerCase()}>{option}</option>
               {/each}
             </select>
           </td>
           <td>
-            <span id="cashbackPercentage2" class="font-bold text-xl">{cashbackPercentage}</span>
+            <span id="cashbackPercentage2" class="font-bold text-xl">{getCashbackPercentage("Chase Unlimited", selectedCategory)}</span>
           </td>
         </tr>
         <!-- row 3 -->
@@ -472,84 +525,68 @@ async function postToCommunity() {
             <select id="categorySelect3" class="select select-bordered w-32" on:change={(event) => handleCategoryChange(event, 3)}>
               <option disabled selected class="w-auto">category</option>
               {#each ['Clothes', 'Dining', 'Drug Store', 'Entertainment', 'Gas', 'Grocery', 'Others', 'Rent', 'Subscription', 'Transport', 'Travel'] as option}
-              <option value={option.toLowerCase()}>{option}</option>
+                <option value={option.toLowerCase()}>{option}</option>
               {/each}
             </select>
           </td>
           <td>
-            <span id="cashbackPercentage3" class="font-bold text-xl">{cashbackPercentage}</span>
+            <span id="cashbackPercentage3" class="font-bold text-xl">{getCashbackPercentage("BOA", selectedCategory)}</span>
           </td>
         </tr>
-      </tbody>
+      </tbody>      
     </table>
   </div>
 
   <div class="rounded-box place-items-center w-full h-96 bg-primary mr-2 drop-shadow-lg overflow-scroll">
-        <form on:submit|preventDefault={uploadIncome}>
-          <table class="table table-pin-rows font-mono">
-            <!-- head -->
-            <thead>
-              <tr>
-                <th>
-                  <div>
-                    <button type="button" on:click={addIncomeRow}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
-                    </button>
-                  </div>
-                </th>
-                <th class="font-bold text-xl">Income</th>
-                <th class="font-bold text-xl">Amount</th>
-                <th class="font-bold text-xl">Date</th>
-                <th class="font-bold text-xl">Note</th>
-              </tr>
-            </thead>
-            <tbody id="incomeRows">
-              <!-- row 1 -->
-              <tr>
-                <th>1</th>
-                <td>
-                  <div class="dropdown dropdown-bottom flex flex-start">
-                    <select name="income" class="select select-bordered w-32">
-                      <option disabled selected>income</option>
-                      {#each ['salary','gift', 'stocks', 'rent', 'sales', 'others'] as option}
+    <form on:submit|preventDefault={uploadIncome}>
+      <table class="table table-pin-rows font-mono">
+        <!-- head -->
+        <thead>
+          <tr>
+            <th>
+              <div>
+                <button type="button" on:click={addIncomeRow}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </button>
+              </div>
+            </th>
+            <th class="font-bold text-xl">Income</th>
+            <th class="font-bold text-xl">Amount</th>
+            <th class="font-bold text-xl">Date</th>
+            <th class="font-bold text-xl">Note</th>
+          </tr>
+        </thead>
+        <tbody id="incomeRows">
+          {#each Array.from({ length: rowCounter }) as _, index}
+            <tr>
+              <th>{index + 1}</th>
+              <td>
+                <div class="dropdown dropdown-bottom flex flex-start">
+                  <select name={`income_${index}`} class="select select-bordered w-32">
+                    <option disabled selected>income</option>
+                    {#each ['salary', 'gift', 'stocks', 'rent', 'sales', 'others'] as option}
                       <option value={option.toLowerCase()}>{option}</option>
-                      {/each}
-                    </select>
-                  </div>
-                </td>
-                <td><input name="incomeAmount" type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
-                <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
-                <td><input name="note" type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
-              </tr>
-              <!-- row 2 -->
-              <tr>
-                <th>2</th>
-                <td>
-                  <div class="dropdown dropdown-bottom flex flex-start">
-                    <select name="income" class="select select-bordered w-32">
-                      <option disabled selected>income</option>
-                      {#each ['salary','gift', 'stocks', 'rent', 'sales', 'others'] as option}
-                      <option value={option.toLowerCase()}>{option}</option>
-                      {/each}
-                    </select>
-                  </div>
-                </td>
-                <td><input name="incomeAmount" type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
-                <td><input name="date" type="date" class="input input-bordered input-primary w-32" /></td>
-                <td><input name="note" type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="flex content-center justify-center align-middle items-center m-2 ">
-            <button type="submit" class="btn drop-shadow-lg">Submit</button>
-          </div>
-        </form>
+                    {/each}
+                  </select>
+                </div>
+              </td>
+              <td><input name={`incomeAmount_${index}`} type="text" placeholder="99.99" class="input input-bordered input-primary w-24 max-w-xs" /></td>
+              <td><input name={`date_${index}`} type="date" class="input input-bordered input-primary w-32" /></td>
+              <td><input name={`note_${index}`} type="text" placeholder="Note" class="input input-bordered input-primary w-28 max-w-xs" /></td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+      <div class="flex content-center justify-center align-middle items-center m-2">
+        <button type="submit" class="btn drop-shadow-lg">Submit</button>
       </div>
+    </form>
+  </div>
+  
 </div>
-
 </container>
 
 
