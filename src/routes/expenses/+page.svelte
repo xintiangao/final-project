@@ -78,7 +78,7 @@
         category: evt.target['category'].value,
         amount: parseInt(evt.target['amount'].value),
         note: evt.target['note'].value,
-        date: selectedDate,
+        date: result.receiptDate,
        };
 
        const resp = await fetch(PUBLIC_BACKEND_BASE_URL + '/expense-input', {
