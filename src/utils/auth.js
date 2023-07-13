@@ -34,6 +34,15 @@ export function getTokenFromLocalStorage() {
 	return null;
 }
 
+export function getaccessTokenFromLocalStorage() {
+    const auth = localStorage.getItem("auth")
+    if (auth) {
+        return JSON.parse(auth)["accessToken"]
+        LoggedInState.set(true)
+    }
+    return null
+}
+
 export function getGoogleToken() {
 	const auth = localStorage.getItem('oauth2');
 	if (auth) {
