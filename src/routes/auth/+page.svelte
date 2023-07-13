@@ -10,7 +10,7 @@
 
 	let isLoading = false;
 	let showModal = false;
-	let showErrorMessage = false;git 
+	let showErrorMessage = false; 
 	let email = '';
 	let password = '';
 
