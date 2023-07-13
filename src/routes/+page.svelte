@@ -2,12 +2,13 @@
 <script>
   import Chart from 'chart.js/auto'
   import { onMount } from 'svelte';
-  import { addRow, uploadExpenses, addIncomeRow, uploadIncome } from './utils.js'
-  import { getUserId } from "../utils/auth"
+  import { addRow, uploadExpenses, addIncomeRow, uploadIncome, data } from './utils.js'
+  import { getUserId, getTokenFromLocalStorage } from "../utils/auth"
   import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
 
   let expenseData = [];
   let incomeData =[];
+  let goalData = [];
 
   async function fetchExpenseData() {
     expenseData = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
@@ -16,8 +17,33 @@
   async function fetchIncomeData() {
     incomeData = await fetch(PUBLIC_BACKEND_BASE_URL + `/income`).then((response) => response.json());
   }
+
+  let token = getTokenFromLocalStorage()
+  async function fetchSetGoalData(){
+    const res = await fetch(PUBLIC_BACKEND_BASE_URL + `/set-goal`,{
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+			'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+		},
+    })
+    const resp = await res.json();
+    return resp;
+  }
   onMount(fetchExpenseData);
   onMount(fetchIncomeData);
+
+  fetchSetGoalData()
+  .then((data) => {
+    goalData = data;
+    console.log(goalData);
+    return goalData;
+    // Use the retrieved data as needed
+  })
+  .catch((error) => {
+    console.log('Error:', error);
+  });
 
 function calculateTotal(expenses) {
   const currentDate = new Date();
@@ -323,6 +349,32 @@ async function postToCommunity() {
   }
 }
 
+//function to get the goal percentage//
+    let total_expenses = 4000;
+    let total_savings = 5000;
+    let goalAmount = 45000;
+    function getSetGoalPercentage(){
+      const currentAmount = (total_savings - total_expenses)
+      const finalAmount = Math.round((currentAmount / goalAmount) * 100)
+      return finalAmount;
+    }
+
+    let progressValue = getSetGoalPercentage();
+
+//function to get random color of the goal title//
+// export function randomColor() {
+//     // Generate a random color class name //
+//     var colors = ["red", "orange", "amber", "yellow", "lime", "green",
+//                   "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet",
+//                   "purple", "fuchsia", "pink", "rose"];
+//     var randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+//   //   // Set the goalColor variable to the generated random color class name
+//   // document.documentElement.style.setProperty('--goal-color', randomColor);
+//   return randomColor;
+// }
+
+// let setColor = randomColor()
 </script>
 
 <container class="flex justify-around">
@@ -375,8 +427,9 @@ async function postToCommunity() {
       </form>
     </div>
     
-    <div class="rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
-      <div class="bg-secondary text-primary-content">
+    <div class="carousel rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
+      <div class="carousel-item bg-secondary text-primary-content">
+        <div class="w-80">
         <div class="stat">
           <div class="stat-title">Total Spend this month</div>
           <div class="stat-value">${calculateTotal(expenseData)}</div>
@@ -392,9 +445,41 @@ async function postToCommunity() {
             <a class="btn btn-sm" href='/community' on:click={postToCommunity}>Post to community</a> 
           </div>
         </div>
-        
+        </div>
+      </div>
+      
+      <div class="carousel-item w-full h-full flex flex-col justify-center items-center bg-blue-100">
+    <div class="h-96 carousel carousel-vertical rounded-box">
+      <div class="bg-blue-100 rounded-lg shadow-md p-2 carousel-item h-full flex flex-col">
+    
+    {#each goalData as goal_data}
+    <h1 class="text-2xl font-bold my-1 text-center text-orange-500">Saving Goal Tracker</h1>
+    <h1 class="text-xl font-bold text-center text-red-400 flex justify-start underline pl-2 mb-1">{goal_data.title}</h1>
+        <div class="bg-white p-2 border rounded-xl w-auto h-auto flex justify-center items-center">
+          <table class="table-auto">
+            <tbody>
+              <tr>
+                <td class="pr-4">Target saving amount:</td>
+                <td class="text-cyan-400">$ {goal_data.totalSaving}</td>
+              </tr>
+              <tr>
+                <td class="pr-4">Time: </td>
+                <td class="font-bold text-sky-900">{goal_data.start_date} - {goal_data.end_date}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+    {/each}
+
+      <div class="flex justify-center items-center">
+        <div class="radial-progress bg-white text-lime-400 border-4 mx-auto mb-2 mt-2" style="--value:{progressValue}; --size:7rem; --thickness:10px;">
+          <p class="text-center text-lg font-bold mt-4">{progressValue}%</p>
+        </div>
+      </div>
       </div>
     </div>
+  </div>
+</div>
 
     <div class="carousel rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
       <!-- svelte-ignore a11y-no-interactive-element-to-noninteractive-role -->

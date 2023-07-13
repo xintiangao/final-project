@@ -6,7 +6,7 @@ export async function load({ fetch, params }) {
   const res = await resp.json();
   if (resp.status == 200) {
     return {
-      expense: res
+      expense: res,
     }
   } else {
     return {
@@ -14,4 +14,3 @@ export async function load({ fetch, params }) {
     }
   }
 }
-
