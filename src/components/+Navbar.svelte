@@ -30,6 +30,7 @@ function goToSignInPage() {
           <li><a href='/calculation_record'>Calculation Record</a></li>
           <li><a href='/history'>Transaction History</a></li>
           <li><a href='/income'>Input an Income</a></li>
+          <li><a href='/expenses'>Scan an Expense</a></li>
         </ul>
       </div>
       <button class="w-6 ml-2 flex content-start" on:click={toggleTheme}>

@@ -48,20 +48,20 @@
     let selectedDate;
   
     onMount(() => {
-      flatpickr('#date-input', {
-        dateFormat: 'Y-m-d',
-        enable: [
-          {
-            from: 'today',
-            to: new Date().fp_incr(365),
-          },
-        ],
-      // Add any other options or customizations as needed
-        onChange: (selectedDates) => {
-          selectedDate = selectedDates[0];
+    flatpickr('#date-input', {
+      dateFormat: 'Y-m-d',
+      enable: [
+        {
+          from: 'today',
+          to: new Date().fp_incr(365),
         },
-      });
+      ],
+      onChange: (selectedDates) => {
+        const formattedDate = selectedDates[0].toISOString().split('T')[0];
+        result.receiptDate = formattedDate;
+      },
     });
+  });
 
     function postInputExpenses() {
         goto('/');
@@ -78,7 +78,7 @@
         category: evt.target['category'].value,
         amount: parseInt(evt.target['amount'].value),
         note: evt.target['note'].value,
-        date: selectedDate,
+        date: result.receiptDate,
        };
 
        const resp = await fetch(PUBLIC_BACKEND_BASE_URL + '/expense-input', {
