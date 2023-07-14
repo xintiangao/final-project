@@ -41,7 +41,7 @@ function goToSignInPage() {
           <li><a href='/goals'>Set Goals</a></li>
           <li><a href='/calculation_record'>Goal Record</a></li>
           <li><a href='/history'>Transaction History</a></li>
-          <li><a href='/income'>Input an Income</a></li>
+          <li><a href='/expenses'>Scan an Expense</a></li>
           <li><a href='/banks'>Set Credit Card Cash Back</a></li>
         </ul>
       </div>
