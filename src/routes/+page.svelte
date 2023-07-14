@@ -68,7 +68,6 @@ export function addRow() {
   .then((data) => {
     goalData = data;
     goalAmount = goalData.map((item) => item.totalSaving);
-    console.log(goalAmount[goalAmount.length - 1])
     return goalData, goalAmount;
   }).catch((error) => {
     console.log('Error:', error);
@@ -390,20 +389,24 @@ async function postToCommunity() {
   }
 }
 
+let finalAmount = 0;
+let total_savings = 0;
 //function to get the goal percentage//
 async function getSetGoalPercentage() {
   await fetchExpenseData();
   await fetchIncomeData();
-  const total_savings = CalculateTotalSaving(expenseData, incomeData) * 0.1;
-  const finalAmount = Math.round((total_savings / goalAmount[goalAmount.length - 1]) * 100);
-  return finalAmount;
+  total_savings = CalculateTotalSaving(expenseData, incomeData) * 0.1;
+  finalAmount = Math.round((total_savings / goalAmount[goalAmount.length - 1]) * 100);
+  return { finalAmount, total_savings };
 }
 
 let progressValue = 0;
+let currentSavingAmount = 0;
 async function updateProgressValue() {
-  progressValue = await getSetGoalPercentage();
-  console.log(progressValue);
-  return progressValue;
+  const { finalAmount, total_savings } = await getSetGoalPercentage();
+  currentSavingAmount = Math.round(total_savings);
+  progressValue = finalAmount;
+  return progressValue, currentSavingAmount;
 }
 
 onMount(updateProgressValue);
@@ -491,7 +494,7 @@ onMount(updateProgressValue);
 
     <div class="stat h-auto overflow-y-scroll">
   <h1 class="text-center text-3xl font-bold mb-4">Saving Goal Tracker</h1>
-  <h1 class="text-center text-lg font-bold underline mb-2">{goal_data.title}</h1>
+  <h1 class="text-center text-lg stat-title underline mb-2">{goal_data.title}</h1>
   <div class="bg-white p-4 rounded-xl mb-4">
     <table class="table-auto">
       <tbody>
@@ -508,9 +511,12 @@ onMount(updateProgressValue);
   </div>
 
   <div class="flex justify-center items-center">
-      <div class="radial-progress bg-white text-white bg-gradient-to-r from-lime-400 to-green-500 border-4 mx-auto mb-2 mt-2" style="--value:{progressValue}; --size:8rem; --thickness:10px;">
-        <p class="text-center text-lg font-bold mt-4">{progressValue}%</p>
-      </div>
+      <div class="tooltip inline-block" data-tip="Total accumulate saving amount: ${currentSavingAmount}">
+  <div class="radial-progress bg-white text-white bg-gradient-to-r from-lime-400 to-green-500 border-4 mx-auto mb-2 mt-2" style="--value:{progressValue}; --size:8rem; --thickness:10px;">
+    <p class="text-center text-lg font-bold mt-4">{progressValue}%</p>
+  </div>
+</div>
+
     </div>
   </div>
 </div>
