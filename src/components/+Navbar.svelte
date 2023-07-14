@@ -15,6 +15,18 @@ function goToSignInPage() {
 	}
 </script>
 
+<style>
+  @keyframes spin {
+    0% { transform: rotate(0); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .spin-animation {
+    animation: spin 1s linear forwards;
+  }
+</style>
+
+
 <div class="navbar bg-base-100 p-3 mb-6">
     <div class="navbar-start">
       <div class="dropdown">
@@ -24,12 +36,13 @@ function goToSignInPage() {
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
         </label>
         <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-auto font-mono">
           <li><a href='/community'>Community</a></li>
           <li><a href='/goals'>Set Goals</a></li>
-          <li><a href='/calculation_record'>Calculation Record</a></li>
+          <li><a href='/calculation_record'>Goal Record</a></li>
           <li><a href='/history'>Transaction History</a></li>
           <li><a href='/income'>Input an Income</a></li>
+          <li><a href='/banks'>Set Credit Card Cash Back</a></li>
         </ul>
       </div>
       <button class="w-6 ml-2 flex content-start" on:click={toggleTheme}>
@@ -42,26 +55,27 @@ function goToSignInPage() {
       </button>
     </div>
     <div class="navbar-center">
-      <a href='/' class="btn btn-ghost normal-case text-3xl font-mono gap-0">
+      <a href='/' class="btn btn-ghost normal-case text-3xl font-mono gap-0 spin-animation">
         <div class="text-primary font-bold">Budget</div>
         <div>Butler</div>
       </a>
     </div>
-    <div class="navbar-end">
-      <button class="btn btn-ghost btn-circle">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-      </button>
 
+    <div class="navbar-end">
+      <a href='/community'> 
+        <button class="btn btn-ghost btn-circle" >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        </button>
+      </a>
     <div>
 		{#if $isAuthenticated}
 			<a href="/" on:click={logOut}>
-                <button class="btn btn-ghost btn-circle">
-                    <button class="indicator">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                
-                    </button>
-                </button>
-            </a>
+        <button class="btn btn-ghost btn-circle">
+          <button class="indicator">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+          </button>
+        </button>
+      </a>
 		{:else}
 			<a href="/auth" on:click={goToSignInPage}>
                 <button class="btn btn-ghost btn-circle">
