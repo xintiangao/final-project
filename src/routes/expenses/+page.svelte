@@ -74,7 +74,7 @@
         console.log(userId)
 
         const ExpensesData = {
-        userId: userId,
+        userId: parseInt(userId),
         category: evt.target['category'].value,
         amount: parseInt(evt.target['amount'].value),
         note: evt.target['note'].value,
