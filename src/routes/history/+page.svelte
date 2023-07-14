@@ -6,7 +6,6 @@
 
   let expense = [];
   let successMessage = false;
-  let userId = getUserId();
   
   async function fetchExpenseData() {
     expense = await fetch(PUBLIC_BACKEND_BASE_URL + `/expense-input`).then((response) => response.json());
@@ -83,9 +82,6 @@
     }
   }
 }
-
-
-
 
   async function updateExpenses(evt) {
     evt.preventDefault();

@@ -9,7 +9,7 @@
   import html2canvas from 'html2canvas';
   import { uploadExpenses,  uploadIncome, CalculateTotalSaving } from './utils.js'
   import { getUserId } from "../utils/auth"
-  import { uploadMedia, generateFileWithUniqueName } from "../utils/s3-uploader.js"
+  import { uploadMedia } from "../utils/s3-uploader.js"
   import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
 
 
@@ -27,9 +27,9 @@
 
 
 export function addIncomeRow() {
-      incomeRows = [...incomeRows, {}];
-      rowCounter++;
-    }
+  incomeRows = [...incomeRows, {}];
+  rowCounter++;
+}
 export function addRow() {
   expenseRows = [...expenseRows, {}];
   expenseRow++;
@@ -284,7 +284,6 @@ function calculateTotal(expenses) {
     });
   });
 
-
   let cashbackPercentage = ""; 
 
   function handleCategoryChange(event, bankIndex) {
@@ -458,7 +457,7 @@ async function postToCommunity() {
   </div>
 
 <div class="rounded-box">
-  <div class="rounded-box place-items-center w-[100%] h-auto flex flex-wrap bg-primary drop-shadow-lg mb-2">
+  <div class="rounded-box place-items-center w-[100%] h-auto flex flex-wrap bg-primary drop-shadow-lg mb-2 mt-2">
     <table id="bankTable" class="table table-pin-rows font-mono h-[100%]">
       <!-- head -->
       <thead>
@@ -537,7 +536,7 @@ async function postToCommunity() {
     </table>
   </div>
 
-  <div class="rounded-box place-items-center w-full h-96 bg-primary mr-2 drop-shadow-lg overflow-scroll">
+  <div class="rounded-box place-items-center w-full h-80 bg-primary mr-2 mt-5 drop-shadow-lg overflow-scroll">
     <form on:submit|preventDefault={uploadIncome}>
       <table class="table table-pin-rows font-mono">
         <!-- head -->
