@@ -29,7 +29,6 @@ function goToSignInPage() {
           <li><a href='/goals'>Set Goals</a></li>
           <li><a href='/calculation_record'>Calculation Record</a></li>
           <li><a href='/history'>Transaction History</a></li>
-          <li><a href='/income'>Input an Income</a></li>
           <li><a href='/expenses'>Scan an Expense</a></li>
         </ul>
       </div>
