@@ -5,10 +5,10 @@
 <script>
   import Chart from 'chart.js/auto'
   import createObserverPlugin from './observer-plugin.js';
-  import { onMount } from 'svelte';
+  import { onMount, afterUpdate} from 'svelte';
   import html2canvas from 'html2canvas';
   import { uploadExpenses,  uploadIncome, CalculateTotalSaving } from './utils.js'
-  import { getUserId } from "../utils/auth"
+  import { getUserId, getTokenFromLocalStorage} from "../utils/auth"
   import { uploadMedia, generateFileWithUniqueName } from "../utils/s3-uploader.js"
   import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
 
@@ -16,6 +16,7 @@
   let expenseData = [];
   let incomeData = [];
   let goalData = [];
+  let goalAmount = [];
   let incomeRows = [];
   let expenseRows = [];
   let rowCounter = 1;
@@ -23,8 +24,8 @@
   let userId = getUserId();
   let pieChartUrl  = '';
   let fileName;
-  let selectedCategory = ""; 
-  let progressValue;
+  let selectedCategory = "";
+  let index = 0;
 
 export function addIncomeRow() {
       incomeRows = [...incomeRows, {}];
@@ -43,9 +44,9 @@ export function addRow() {
     incomeData = await fetch(PUBLIC_BACKEND_BASE_URL + `/income-input/${userId}`).then((response) => response.json());
   }
 
-  async function fetchGoalData() {
-    goalData = await fetch(PUBLIC_BACKEND_BASE_URL + `/set-goal/${userId}`).then((response) => response.json());
-  }
+  // async function fetchGoalData() {
+  //   goalData = await fetch(PUBLIC_BACKEND_BASE_URL + `/set-goal/${userId}`).then((response) => response.json());
+  // }
 
   let token = getTokenFromLocalStorage()
   async function fetchSetGoalData(){
@@ -66,17 +67,12 @@ export function addRow() {
   fetchSetGoalData()
   .then((data) => {
     goalData = data;
-    console.log(goalData);
-    return goalData;
-    // Use the retrieved data as needed
-  })
-  .catch((error) => {
+    goalAmount = goalData.map((item) => item.totalSaving);
+    console.log(goalAmount[goalAmount.length - 1])
+    return goalData, goalAmount;
+  }).catch((error) => {
     console.log('Error:', error);
   });
-
-  onMount(fetchExpenseData);
-  onMount(fetchIncomeData);
-  onMount(fetchGoalData);
 
 function calculateTotal(expenses) {
   const currentDate = new Date();
@@ -394,6 +390,24 @@ async function postToCommunity() {
   }
 }
 
+//function to get the goal percentage//
+async function getSetGoalPercentage() {
+  await fetchExpenseData();
+  await fetchIncomeData();
+  const total_savings = CalculateTotalSaving(expenseData, incomeData) * 0.1;
+  const finalAmount = Math.round((total_savings / goalAmount[goalAmount.length - 1]) * 100);
+  return finalAmount;
+}
+
+let progressValue = 0;
+async function updateProgressValue() {
+  progressValue = await getSetGoalPercentage();
+  console.log(progressValue);
+  return progressValue;
+}
+
+onMount(updateProgressValue);
+
 </script>
 
 <container class="flex justify-around">
@@ -461,7 +475,7 @@ async function postToCommunity() {
         
         <div class="stat">
           <div class="stat-title">Total Saving</div>
-          <div class="stat-value">${calculateTotal(expenseData)}</div>
+          <div class="stat-value">${CalculateTotalSaving(expenseData, incomeData)}</div>
           <div class="stat-actions">
             <a class="btn btn-sm" href='/community' on:click={postToCommunity}>Post to community</a> 
           </div>
@@ -469,38 +483,44 @@ async function postToCommunity() {
         </div>
       </div>
       
-      <div class="carousel-item w-full h-full flex flex-col justify-center items-center bg-blue-100">
+<div class="carousel-item w-full h-full flex flex-col justify-center items-center bg-blue-100">
     <div class="h-96 carousel carousel-vertical rounded-box">
+      {#each goalData as goal_data, index}
+      {#if index === goalData.length - 1 }
       <div class="bg-blue-100 rounded-lg shadow-md p-2 carousel-item h-full flex flex-col">
-    
-    {#each goalData as goal_data}
-    <h1 class="text-2xl font-bold my-1 text-center text-orange-500">Saving Goal Tracker</h1>
-    <h1 class="text-xl font-bold text-center text-red-400 flex justify-start underline pl-2 mb-1">{goal_data.title}</h1>
-        <div class="bg-white p-2 border rounded-xl w-auto h-auto flex justify-center items-center">
-          <table class="table-auto">
-            <tbody>
-              <tr>
-                <td class="pr-4">Target saving amount:</td>
-                <td class="text-cyan-400">$ {goal_data.totalSaving}</td>
-              </tr>
-              <tr>
-                <td class="pr-4">Time: </td>
-                <td class="font-bold text-sky-900">{goal_data.start_date} - {goal_data.end_date}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-    {/each}
 
-      <div class="flex justify-center items-center">
-        <div class="radial-progress bg-white text-lime-400 border-4 mx-auto mb-2 mt-2" style="--value:{progressValue}; --size:7rem; --thickness:10px;">
-          <p class="text-center text-lg font-bold mt-4">{progressValue}%</p>
-        </div>
-      </div>
+    <div class="stat h-auto overflow-y-scroll">
+  <h1 class="text-center text-3xl font-bold mb-4">Saving Goal Tracker</h1>
+  <h1 class="text-center text-lg font-bold underline mb-2">{goal_data.title}</h1>
+  <div class="bg-white p-4 rounded-xl mb-4">
+    <table class="table-auto">
+      <tbody>
+        <tr>
+          <td class="pr-4">Target saving amount:</td>
+          <td class="text-cyan-400">$ {goal_data.totalSaving}</td>
+        </tr>
+        <tr>
+          <td class="pr-4">Time:</td>
+          <td class="font-bold text-sky-900">{goal_data.start_date} TO {goal_data.end_date}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex justify-center items-center">
+      <div class="radial-progress bg-white text-white bg-gradient-to-r from-lime-400 to-green-500 border-4 mx-auto mb-2 mt-2" style="--value:{progressValue}; --size:8rem; --thickness:10px;">
+        <p class="text-center text-lg font-bold mt-4">{progressValue}%</p>
       </div>
     </div>
   </div>
 </div>
+       {/if}
+    {/each}
+    </div>
+  </div>
+</div>
+
+    
 
     <div class="carousel rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
       <!-- svelte-ignore a11y-no-interactive-element-to-noninteractive-role -->
@@ -514,7 +534,7 @@ async function postToCommunity() {
         <canvas id="barChart" class="w-full h-full border-primary" bind:this={barChart}></canvas>
       </div> 
     </div>
-  </div>
+</div>
 
 <div class="rounded-box">
   <div class="rounded-box place-items-center w-[100%] h-auto flex flex-wrap bg-primary drop-shadow-lg mb-2">
@@ -647,5 +667,3 @@ async function postToCommunity() {
   
 </div>
 </container>
-
-
