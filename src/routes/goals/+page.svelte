@@ -105,6 +105,9 @@ let categories = [{name: "food", value:""},
 		},
 		body: JSON.stringify(set_goal_record)
 	});
+    if(resp.status == 200){
+        goto('/');
+    }
 }
 
 //function to post calculation result to the database (calculationRecord table)//
@@ -253,31 +256,31 @@ let categories = [{name: "food", value:""},
             <table class="table-auto">
                 <tbody>
                     <tr>
-                        <td class="pr-4">Saving plan title:</td>
+                        <th class="pr-4">Saving plan title:</th>
                         <td>{Goal_Title}</td>
                     </tr>
                     <tr>
-                        <td class="pr-4">Estimate income per month:</td>
+                        <th class="pr-4">Estimate income per month:</th>
                         <td>$ {income}</td>
                     </tr>
                     <tr>
-                        <td class="pr-4">Total expenses per month:</td>
+                        <th class="pr-4">Total expenses per month:</th>
                         <td>$ {total_expenses}</td>
                     </tr>
                     <tr>
-                        <td class="pr-4">Balance per month:</td>
+                        <th class="pr-4">Balance per month:</th>
                         <td class="font-bold">$ {balance_per_month}</td>
                     </tr>
                     <tr>
-                        <td class="pr-4">Target saving amount:</td>
+                        <th class="pr-4">Target saving amount:</th>
                         <td>$ {totalSaving}</td>
                     </tr>
                     <tr>
-                        <td class="pr-4">Estimate time to achieve the target:</td>
+                        <th class="pr-4">Estimate time to achieve the target:</th>
                         <td>{duration} {durationType}</td>
                     </tr>
                     <tr>
-                        <td class="pr-4">Target need to save per month:</td>
+                        <th class="pr-4">Target need to save per month:</th>
                         <td class="font-bold">$ {finalSavings}</td>
                     </tr>
                 </tbody>

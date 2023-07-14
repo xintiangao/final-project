@@ -5,17 +5,18 @@
 <script>
   import Chart from 'chart.js/auto'
   import createObserverPlugin from './observer-plugin.js';
-  import { onMount } from 'svelte';
+  import { onMount, afterUpdate} from 'svelte';
   import html2canvas from 'html2canvas';
   import { uploadExpenses,  uploadIncome, CalculateTotalSaving } from './utils.js'
-  import { getUserId } from "../utils/auth"
-  import { uploadMedia } from "../utils/s3-uploader.js"
+  import { getUserId, getTokenFromLocalStorage} from "../utils/auth"
+  import { uploadMedia, generateFileWithUniqueName } from "../utils/s3-uploader.js"
   import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
 
 
   let expenseData = [];
   let incomeData = [];
   let goalData = [];
+  let goalAmount = [];
   let incomeRows = [];
   let expenseRows = [];
   let rowCounter = 1;
@@ -23,8 +24,10 @@
   let userId = getUserId();
   let pieChartUrl  = '';
   let fileName;
+  let index = 0;
   let selectedCategory = ""; 
   let cashbackPercentage = ""; 
+
 
 
 export function addIncomeRow() {
@@ -44,13 +47,34 @@ export function addRow() {
     incomeData = await fetch(PUBLIC_BACKEND_BASE_URL + `/income-input/${userId}`).then((response) => response.json());
   }
 
-  async function fetchGoalData() {
-    goalData = await fetch(PUBLIC_BACKEND_BASE_URL + `/set-goal/${userId}`).then((response) => response.json());
-  }
+  // async function fetchGoalData() {
+  //   goalData = await fetch(PUBLIC_BACKEND_BASE_URL + `/set-goal/${userId}`).then((response) => response.json());
+  // }
 
+  let token = getTokenFromLocalStorage()
+  async function fetchSetGoalData(){
+    const res = await fetch(PUBLIC_BACKEND_BASE_URL + `/set-goal`,{
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+			'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+		},
+    })
+    const resp = await res.json();
+    return resp;
+  }
   onMount(fetchExpenseData);
   onMount(fetchIncomeData);
-  onMount(fetchGoalData);
+
+  fetchSetGoalData()
+  .then((data) => {
+    goalData = data;
+    goalAmount = goalData.map((item) => item.totalSaving);
+    return goalData, goalAmount;
+  }).catch((error) => {
+    console.log('Error:', error);
+  });
 
 function calculateTotal(expenses) {
   const currentDate = new Date();
@@ -369,6 +393,28 @@ async function postToCommunity() {
   }
 }
 
+let finalAmount = 0;
+let total_savings = 0;
+//function to get the goal percentage//
+async function getSetGoalPercentage() {
+  await fetchExpenseData();
+  await fetchIncomeData();
+  total_savings = CalculateTotalSaving(expenseData, incomeData) * 0.1;
+  finalAmount = Math.round((total_savings / goalAmount[goalAmount.length - 1]) * 100);
+  return { finalAmount, total_savings };
+}
+
+let progressValue = 0;
+let currentSavingAmount = 0;
+async function updateProgressValue() {
+  const { finalAmount, total_savings } = await getSetGoalPercentage();
+  currentSavingAmount = Math.round(total_savings);
+  progressValue = finalAmount;
+  return progressValue, currentSavingAmount;
+}
+
+onMount(updateProgressValue);
+
 </script>
 
 <container class="flex justify-around">
@@ -423,8 +469,9 @@ async function postToCommunity() {
       </form>
     </div>
     
-    <div class="rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
-      <div class="bg-secondary text-primary-content">
+    <div class="carousel rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
+      <div class="carousel-item bg-secondary text-primary-content">
+        <div class="w-80">
         <div class="stat">
           <div class="stat-title">Total Spend this month</div>
           <div class="stat-value">${calculateTotal(expenseData)}</div>
@@ -439,11 +486,51 @@ async function postToCommunity() {
           <div class="stat-actions">
             <a class="btn btn-sm" href='/community' on:click={postToCommunity}>Post to community</a> 
           </div>
-          
         </div>
-        
+        </div>
       </div>
+      
+<div class="carousel-item w-full h-full flex flex-col justify-center items-center bg-blue-100">
+    <div class="h-96 carousel carousel-vertical rounded-box">
+      {#each goalData as goal_data, index}
+      {#if index === goalData.length - 1 }
+      <div class="bg-blue-100 rounded-lg shadow-md p-2 carousel-item h-full flex flex-col">
+
+    <div class="stat h-auto overflow-y-scroll">
+  <h1 class="text-center text-3xl font-bold mb-4">Saving Goal Tracker</h1>
+  <h1 class="text-center text-lg stat-title underline mb-2">{goal_data.title}</h1>
+  <div class="bg-white p-4 rounded-xl mb-4">
+    <table class="table-auto">
+      <tbody>
+        <tr>
+          <td class="pr-4">Target saving amount:</td>
+          <td class="text-cyan-400">$ {goal_data.totalSaving}</td>
+        </tr>
+        <tr>
+          <td class="pr-4">Time:</td>
+          <td class="font-bold text-sky-900">{goal_data.start_date} TO {goal_data.end_date}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex justify-center items-center">
+      <div class="tooltip inline-block" data-tip="Total accumulate saving amount: ${currentSavingAmount}">
+  <div class="radial-progress bg-white text-white bg-gradient-to-r from-lime-400 to-green-500 border-4 mx-auto mb-2 mt-2" style="--value:{progressValue}; --size:8rem; --thickness:10px;">
+    <p class="text-center text-lg font-bold mt-4">{progressValue}%</p>
+  </div>
+</div>
+
     </div>
+  </div>
+</div>
+       {/if}
+    {/each}
+    </div>
+  </div>
+</div>
+
+    
 
     <div class="carousel rounded-box w-[47%] h-80 bg-secondary overflow-scroll m-2 drop-shadow-lg">
       <!-- svelte-ignore a11y-no-interactive-element-to-noninteractive-role -->
@@ -457,7 +544,7 @@ async function postToCommunity() {
         <canvas id="barChart" class="w-full h-full border-primary" bind:this={barChart}></canvas>
       </div> 
     </div>
-  </div>
+</div>
 
 <div class="rounded-box">
   <div class="rounded-box place-items-center w-[100%] h-auto flex flex-wrap bg-primary drop-shadow-lg mb-2 mt-2">
@@ -590,3 +677,4 @@ async function postToCommunity() {
   
 </div>
 </container>
+

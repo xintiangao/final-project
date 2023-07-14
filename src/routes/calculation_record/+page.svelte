@@ -2,6 +2,7 @@
     export let data;
     import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
     import { getTokenFromLocalStorage} from '../../utils/auth.js';
+    import { goto } from '$app/navigation';
     let startDate;
     let time;
     let duration;
@@ -88,6 +89,9 @@
 		            },
 		        body: JSON.stringify(set_goal_record)
 	        });
+          if(resp.status == 200){
+            goto('/');
+          }
       }
 </script>
 
