@@ -2,7 +2,7 @@
 import { getUserId, getTokenFromLocalStorage } from "../../utils/auth";
 import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
 import { onMount } from "svelte";
-export let data;
+// export let data;
 
 let isLoading = false;
 let bankRows = [];
