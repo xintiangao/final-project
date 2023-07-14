@@ -105,6 +105,9 @@ let categories = [{name: "food", value:""},
 		},
 		body: JSON.stringify(set_goal_record)
 	});
+    if(resp.status == 200){
+        goto('/');
+    }
 }
 
 //function to post calculation result to the database (calculationRecord table)//
