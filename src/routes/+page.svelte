@@ -24,8 +24,11 @@
   let userId = getUserId();
   let pieChartUrl  = '';
   let fileName;
-  let selectedCategory = "";
   let index = 0;
+  let selectedCategory = ""; 
+  let cashbackPercentage = ""; 
+
+
 
 export function addIncomeRow() {
   incomeRows = [...incomeRows, {}];
@@ -306,17 +309,18 @@ function calculateTotal(expenses) {
     });
   });
 
-  let cashbackPercentage = ""; 
 
-  function handleCategoryChange(event, bankIndex) {
-    selectedCategory = event.target.value.toLowerCase();
+function handleCategoryChange(event, bankIndex) {
+  selectedCategory = event.target.value.toLowerCase();
+  setCategory(selectedCategory);
 
-    for (let i = bankIndex + 1; i <= 3; i++) {
-      const categorySelectId = `categorySelect${i}`;
-      const categorySelectElement = document.getElementById(categorySelectId);
-      categorySelectElement.value = selectedCategory;
-    }
+  for (let i = bankIndex + 1; i <= 3; i++) {
+    const categorySelectId = `categorySelect${i}`;
+    const categorySelectElement = document.getElementById(categorySelectId);
+    categorySelectElement.value = selectedCategory;
   }
+}
+
 
   function handleCategoryHeaderChange(event) {
     selectedCategory = event.target.value.toLowerCase();
@@ -327,6 +331,7 @@ function calculateTotal(expenses) {
       categorySelectElement.value = selectedCategory;
     }
   }
+
 function getCashbackPercentage(bank, category) {
     if (bank === "Discover") {
       if (category === "gas") {
@@ -672,3 +677,4 @@ onMount(updateProgressValue);
   
 </div>
 </container>
+

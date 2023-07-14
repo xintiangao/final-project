@@ -2,7 +2,7 @@
 import { getUserId, getTokenFromLocalStorage } from "../../utils/auth";
 import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
 import { onMount } from "svelte";
-export let data;
+// export let data;
 
 let isLoading = false;
 let bankRows = [];
@@ -320,85 +320,85 @@ export function deleteRow(index) {
     </form>
 </div>
 
-    <div class="first-letter:uppercase">
-        {#if successMessage}
-        <div  class="flex justify-center">
-          <div class="alert alert-success rounded-lg w-[80%]">
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span>The credit card has been updated!</span>
-          </div>
+<div class="first-letter:uppercase">
+{#if successMessage}
+<div  class="flex justify-center">
+    <div class="alert alert-success rounded-lg w-[80%]">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <span>The credit card has been updated!</span>
+    </div>
+</div>
+{/if}
+    <div class="overflow-x-auto m-10 w-2/3 ml-auto mr-auto">
+        <form on:submit={updateBankInfo}>
+        <table class="table font-mono p-10">
+            <!-- head -->
+            <thead class="bg-primary rounded-md table-pin-rows">
+            <tr class="font-bold text-lg">
+                <th>                
+                </th>
+                <th>Credit Card</th>
+                <th>Category</th>
+                <th>Cash-Back %</th>
+                <th>Edit</th>
+            </tr>
+            </thead>
+            <tbody>
+            {#each bankData.sort((a, b) => a.name.localeCompare(b.name)) as bank}
+            {#each cashBackData.filter(c => c.bankId === bank.id) as cashBack}
+            <!-- row 1 -->
+            <tr class="hover">
+            {#if editedBank && editedBank.id === bank.id}
+            <!-- Edit mode -->
+            <td></td>
+            <td>
+            <div class = "form-control w-full">
+                <label for="name"></label> 
+                    <input type ="text" name = "name" bind:value={name} required>
+            </div>
+            </td>
+            <td>
+            <div class="form-control w-full dropdown dropdown-bottom flex flex-start">
+                <label for="category"></label>
+                <select name="category" bind:value={category} required>
+                <option disabled selected>Choose a category</option>
+                {#each ['Clothes', 'Dining', 'Drug Store', 'Entertainment', 'Gas', 'Grocery', 'Rent', 'Subscription', 'Transport', 'Travel','Others','Default',] as option}
+                    <option value={option.toLowerCase()}>{option}</option>
+                {/each}
+                </select>
+            </div>
+            </td>
+            <td>
+            <div class = "form-control w-full">
+                <label for="cashBack"></label> 
+                <input type="text" name="cashBack" bind:value={cashBack.cashBack} required>
+            </div>
+            </td>
+            <td>
+            <button type="submit">Save</button>
+            <button on:click={cancelEditing}>Cancel</button>
+            </td>
+            {:else}
+            <th></th>
+            <td>{bank.name}</td>
+            <td>{cashBack.category}</td>
+            <td>{cashBack.cashBack}</td>
+                <td>
+                <button on:click={() => startEditing(cashBack)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
+                </button>
+                <button on:click={() => deleteHistory(cashBack.id)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+                </td>
+                {/if}
+            </tr>
+            {/each}
+            {/each}
+            </tbody>
+        </table>
+        </form>
         </div>
-        {/if}
-            <div class="overflow-x-auto m-10 w-2/3 ml-auto mr-auto">
-              <form on:submit={updateBankInfo}>
-                <table class="table font-mono p-10">
-                  <!-- head -->
-                  <thead class="bg-primary rounded-md table-pin-rows">
-                    <tr class="font-bold text-lg">
-                      <th>                
-                      </th>
-                      <th>Credit Card</th>
-                      <th>Category</th>
-                      <th>Cash-Back %</th>
-                      <th>Edit</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {#each bankData as bank}
-                    {#each cashBackData.filter(c => c.bankId === bank.id) as cashBack}
-                    <!-- row 1 -->
-                    <tr class="hover">
-                    {#if editedBank && editedBank.id === bank.id}
-                  <!-- Edit mode -->
-                  <td></td>
-                  <td>
-                    <div class = "form-control w-full">
-                      <label for="name"></label> 
-                          <input type ="text" name = "name" bind:value={name} required>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="form-control w-full dropdown dropdown-bottom flex flex-start">
-                      <label for="category"></label>
-                      <select name="category" bind:value={category} required>
-                        <option disabled selected>Choose a category</option>
-                        {#each ['Clothes', 'Dining', 'Drug Store', 'Entertainment', 'Gas', 'Grocery', 'Rent', 'Subscription', 'Transport', 'Travel','Others','Default',] as option}
-                          <option value={option.toLowerCase()}>{option}</option>
-                        {/each}
-                      </select>
-                    </div>
-                  </td>
-                  <td>
-                    <div class = "form-control w-full">
-                      <label for="cashBack"></label> 
-                      <input type="text" name="cashBack" bind:value={cashBack.cashBack} required>
-                    </div>
-                  </td>
-                  <td>
-                    <button type="submit">Save</button>
-                    <button on:click={cancelEditing}>Cancel</button>
-                  </td>
-                  {:else}
-                    <th></th>
-                    <td>{bank.name}</td>
-                    <td>{cashBack.category}</td>
-                    <td>{cashBack.cashBack}</td>
-                      <td>
-                        <button on:click={() => startEditing(cashBack)}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
-                        </button>
-                        <button on:click={() => deleteHistory(cashBack.id)}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                        </button>
-                      </td>
-                      {/if}
-                    </tr>
-                    {/each}
-                    {/each}
-                  </tbody>
-                </table>
-              </form>
-              </div>
-        </div>
+</div>
 
 
