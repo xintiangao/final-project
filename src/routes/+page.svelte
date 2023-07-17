@@ -490,11 +490,11 @@ onMount(updateProgressValue);
         </div>
       </div>
       
-<div class="carousel-item w-full h-full flex flex-col justify-center items-center bg-blue-100">
+<div class="carousel-item w-full h-full flex flex-col justify-center items-center bg-secondary">
     <div class="h-96 carousel carousel-vertical rounded-box">
       {#each goalData as goal_data, index}
       {#if index === goalData.length - 1 }
-      <div class="bg-blue-100 rounded-lg shadow-md p-2 carousel-item h-full flex flex-col">
+      <div class="bg-secondary rounded-lg shadow-md p-2 carousel-item h-full flex flex-col">
 
     <div class="stat h-auto overflow-y-scroll">
   <h1 class="text-center text-3xl font-bold mb-4">Saving Goal Tracker</h1>

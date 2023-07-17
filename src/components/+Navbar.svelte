@@ -5,14 +5,14 @@ import { goto } from '$app/navigation';
 let currentTheme = localStorage.getItem('theme');
 
 function toggleTheme() {
-    currentTheme = currentTheme === 'pastel' ? 'luxury' : 'pastel';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    localStorage.setItem('theme', currentTheme);
+  currentTheme = currentTheme === 'pastel' ? 'luxury' : 'pastel';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  localStorage.setItem('theme', currentTheme);
 }
 
 function goToSignInPage() {
-		goto('/auth');
-	}
+  goto('/auth');
+}
 </script>
 
 <style>
@@ -45,6 +45,7 @@ function goToSignInPage() {
           <li><a href='/banks'>Set Credit Card Cash Back</a></li>
         </ul>
       </div>
+    
       <button class="w-6 ml-2 flex content-start" on:click={toggleTheme}>
         {#if currentTheme === "pastel"}
         <svg class="swap-on fill-current w-10 h-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
@@ -54,6 +55,7 @@ function goToSignInPage() {
         {/if}
       </button>
     </div>
+
     <div class="navbar-center">
       <a href='/' class="btn btn-ghost normal-case text-3xl font-mono gap-0 spin-animation">
         <div class="text-primary font-bold">Budget</div>
@@ -62,11 +64,11 @@ function goToSignInPage() {
     </div>
 
     <div class="navbar-end">
-      <a href='/community'> 
-        <button class="btn btn-ghost btn-circle" >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-        </button>
-      </a>
+        <a href='/community' class="btn btn-ghost btn-circle"> 
+          <button>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </button>
+        </a>
     <div>
 		{#if $isAuthenticated}
 			<a href="/" on:click={logOut}>
@@ -78,13 +80,12 @@ function goToSignInPage() {
       </a>
 		{:else}
 			<a href="/auth" on:click={goToSignInPage}>
-                <button class="btn btn-ghost btn-circle">
-                    <button class="indicator">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    </button>
-                  </button>
-            </a>{/if}
-
+        <button class="btn btn-ghost btn-circle">
+          <button class="indicator">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </button>
+        </button>
+      </a>{/if}
     </div>
   </div>
 </div>
